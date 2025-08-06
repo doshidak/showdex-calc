@@ -115,12 +115,15 @@ export function getFinalSpeed(gen: Generation, pokemon: Pokemon, field: Field, s
     speedMods.push(6144);
   }
 
-  if (pokemon.hasItem('Choice Scarf')) {
-    speedMods.push(6144);
-  } else if (pokemon.hasItem('Iron Ball', ...EV_ITEMS)) {
-    speedMods.push(2048);
-  } else if (pokemon.hasItem('Quick Powder') && pokemon.named('Ditto')) {
-    speedMods.push(8192);
+  if (!(pokemon.hasAbility('Unburden') && pokemon.abilityOn)) {
+    // Unburden active implies item no longer present
+    if (pokemon.hasItem('Choice Scarf')) {
+      speedMods.push(6144);
+    } else if (pokemon.hasItem('Iron Ball', ...EV_ITEMS)) {
+      speedMods.push(2048);
+    } else if (pokemon.hasItem('Quick Powder') && pokemon.named('Ditto')) {
+      speedMods.push(8192);
+    }
   }
 
   speed = OF32(pokeRound((speed * chainMods(speedMods, 410, 131172)) / 4096));
@@ -140,19 +143,22 @@ export function getMoveEffectiveness(
   isGravity?: boolean,
   isRingTarget?: boolean,
 ) {
-  if ((isRingTarget || isGhostRevealed) && type === 'Ghost' && move.hasType('Normal', 'Fighting')) {
+  if (isGhostRevealed && type === 'Ghost' && move.hasType('Normal', 'Fighting')) {
     return 1;
-  } else if ((isRingTarget || isGravity) && type === 'Flying' && move.hasType('Ground')) {
+  } else if (isGravity && type === 'Flying' && move.hasType('Ground')) {
     return 1;
   } else if (move.named('Freeze-Dry') && type === 'Water') {
     return 2;
-  } else if (move.named('Flying Press')) {
-    return (
-      gen.types.get('fighting' as ID)!.effectiveness[type]! *
-      gen.types.get('flying' as ID)!.effectiveness[type]!
-    );
   } else {
-    return gen.types.get(toID(move.type))!.effectiveness[type]!;
+    let effectiveness = gen.types.get(toID(move.type))!.effectiveness[type]!;
+    if (effectiveness === 0 && isRingTarget) {
+      effectiveness = 1;
+    }
+    if (move.named('Flying Press')) {
+      // Can only do this because flying has no other interactions
+      effectiveness *= gen.types.get('flying' as ID)!.effectiveness[type]!;
+    }
+    return effectiveness;
   }
 }
 
@@ -197,6 +203,7 @@ export function checkItem(pokemon: Pokemon, magicRoomActive?: boolean) {
     pokemon.hasAbility('Klutz') && !EV_ITEMS.includes(pokemon.item!) ||
     magicRoomActive
   ) {
+    pokemon.disabledItem = pokemon.item;
     pokemon.item = '' as ItemName;
   }
 }

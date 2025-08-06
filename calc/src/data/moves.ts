@@ -4202,7 +4202,6 @@ const SV_PATCH: {[name: string]: DeepPartial<MoveData>} = {
     maxPower: 130,
     secondaries: true,
     isSound: true,
-    makesContact: true,
   },
   'Aqua Step': {
     bp: 80,
@@ -4374,6 +4373,7 @@ const SV_PATCH: {[name: string]: DeepPartial<MoveData>} = {
     category: 'Special',
     zp: 195,
     maxPower: 140,
+    // Sheer Force boost implemented in gen789.ts
   },
   'Esper Wing': {
     bp: 80,
@@ -4483,7 +4483,6 @@ const SV_PATCH: {[name: string]: DeepPartial<MoveData>} = {
     makesContact: true,
     isPunch: true,
     priority: 1,
-    // Sheer Force boost implemented in gen789.ts
   },
   'Kowtow Cleave': {
     bp: 85,
@@ -4601,14 +4600,14 @@ const SV_PATCH: {[name: string]: DeepPartial<MoveData>} = {
     isPulse: true,
     // Sheer Force boost implemented in gen789.ts
   },
-  'Psychic Noise': {
+  'Polar Flare': {
     bp: 75,
-    type: 'Psychic',
+    type: 'Fire',
     category: 'Special',
     zp: 140,
     maxPower: 130,
     secondaries: true,
-    isSound: true,
+    target: 'allAdjacentFoes',
   },
   'Population Bomb': {
     bp: 20,
@@ -4634,6 +4633,15 @@ const SV_PATCH: {[name: string]: DeepPartial<MoveData>} = {
     bp: 0,
     type: 'Normal',
     category: 'Status',
+  },
+  'Psychic Noise': {
+    bp: 75,
+    type: 'Psychic',
+    category: 'Special',
+    zp: 140,
+    maxPower: 130,
+    secondaries: true,
+    isSound: true,
   },
   Psyblade: {
     bp: 80,

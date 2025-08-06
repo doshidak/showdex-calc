@@ -70,6 +70,9 @@ export function calculateADV(
     desc.weather = field.weather;
     desc.moveType = move.type;
     desc.moveBP = move.bp;
+  } else if (move.named('Brick Break')) {
+    field.defenderSide.isReflect = false;
+    field.defenderSide.isLightScreen = false;
   }
 
   const typeEffectivenessPrecedenceRules = [
@@ -163,13 +166,15 @@ export function calculateADV(
 
   baseDamage = calculateFinalModsADV(baseDamage, attacker, move, field, desc, isCritical);
 
-  baseDamage = Math.floor(baseDamage * typeEffectiveness);
-  result.damage = [];
+  baseDamage = Math.floor(baseDamage * type1Effectiveness);
+  baseDamage = Math.floor(baseDamage * type2Effectiveness);
+  const damage: number[] = [];
   for (let i = 85; i <= 100; i++) {
-    result.damage[i - 85] = Math.max(1, Math.floor((baseDamage * i) / 100));
+    damage[i - 85] = Math.max(1, Math.floor((baseDamage * i) / 100));
   }
+  result.damage = damage;
 
-  if ((move.dropsStats && move.timesUsed! > 1) || move.hits > 1) {
+  if (move.timesUsed! > 1 || move.hits > 1) {
     // store boosts so intermediate boosts don't show.
     const origDefBoost = desc.defenseBoost;
     const origAtkBoost = desc.attackBoost;
@@ -182,6 +187,7 @@ export function calculateADV(
     }
     let usedItems = [false, false];
     let totalModBp = desc.moveBP;
+    const damageMatrix = [damage];
     for (let times = 1; times < numAttacks; times++) {
       usedItems = checkMultihitBoost(gen, attacker, defender, move,
         field, desc, usedItems[0], usedItems[1]);
@@ -192,18 +198,21 @@ export function calculateADV(
         Math.floor((Math.floor((2 * lv) / 5 + 2) * newAt * newBp) / df) / 50
       );
       newBaseDmg = calculateFinalModsADV(newBaseDmg, attacker, move, field, desc, isCritical);
-      newBaseDmg = Math.floor(newBaseDmg * typeEffectiveness);
+      newBaseDmg = Math.floor(newBaseDmg * type1Effectiveness);
+      newBaseDmg = Math.floor(newBaseDmg * type2Effectiveness);
 
-      let damageMultiplier = 85;
-      result.damage = result.damage.map(affectedAmount => {
-        const newFinalDamage = Math.max(1, Math.floor((newBaseDmg * damageMultiplier) / 100));
-        damageMultiplier++;
-        return affectedAmount + newFinalDamage;
-      });
+      // note: damage[] was already defined, so to avoid hurting myself in my confusion, I renamed this lol --keith
+      const damageArray: number[] = [];
+      for (let i = 85; i <= 100; i++) {
+        const newFinalDamage = Math.max(1, Math.floor((newBaseDmg * i) / 100));
+        damageArray[i - 85] = newFinalDamage;
+      }
+      damageMatrix[times] = damageArray;
       if (mods?.hitBasePowers?.length) {
         totalModBp += (desc.moveBP || 0);
       }
     }
+    result.damage = damageMatrix;
     desc.moveBP = totalModBp;
     desc.defenseBoost = origDefBoost;
     desc.attackBoost = origAtkBoost;
@@ -410,11 +419,6 @@ function calculateFinalModsADV(
     }
   }
 
-  if (move.named('Pursuit') && field.defenderSide.isSwitching === 'out') {
-    baseDamage = Math.floor(baseDamage * 2);
-    desc.isSwitching = 'out';
-  }
-
   if (field.gameType !== 'Singles' && move.target === 'allAdjacentFoes') {
     baseDamage = Math.floor(baseDamage / 2);
   }
@@ -441,6 +445,11 @@ function calculateFinalModsADV(
   if (isCritical) {
     baseDamage *= 2;
     desc.isCritical = true;
+  }
+
+  if (move.named('Pursuit') && field.defenderSide.isSwitching === 'out') {
+    baseDamage = Math.floor(baseDamage * 2);
+    desc.isSwitching = 'out';
   }
 
   if (move.named('Weather Ball') && field.weather) {

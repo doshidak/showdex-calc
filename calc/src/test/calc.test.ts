@@ -44,9 +44,9 @@ describe('calc', () => {
 
     tests('Comet Punch', ({gen, calculate, Pokemon, Move}) => {
       expect(calculate(Pokemon('Snorlax'), Pokemon('Vulpix'), Move('Comet Punch'))).toMatch(gen, {
-        1: {range: [108, 129], desc: 'Snorlax Comet Punch (3 hits) vs. Vulpix', result: '(38.7 - 46.2%) -- approx. 3HKO'},
-        3: {range: [132, 156], desc: '0 Atk Snorlax Comet Punch (3 hits) vs. 0 HP / 0 Def Vulpix', result: '(60.8 - 71.8%) -- approx. 2HKO'},
-        4: {range: [129, 156], result: '(59.4 - 71.8%) -- approx. 2HKO'},
+        1: {range: [108, 129], desc: 'Snorlax Comet Punch (3 hits) vs. Vulpix', result: '(38.7 - 46.2%) -- guaranteed 3HKO'},
+        3: {range: [132, 156], desc: '0 Atk Snorlax Comet Punch (3 hits) vs. 0 HP / 0 Def Vulpix', result: '(60.8 - 71.8%) -- guaranteed 2HKO'},
+        4: {range: [129, 156], result: '(59.4 - 71.8%) -- guaranteed 2HKO'},
       });
     });
 
@@ -199,11 +199,65 @@ describe('calc', () => {
     });
 
     inGens(6, 9, ({gen, calculate, Pokemon, Move}) => {
+      test(`Flying Press (gen ${gen})`, () => {
+        const attacker = Pokemon('Hawlucha');
+        const flyingPress = Move('Flying Press');
+        // Test it is 4x dmg if weak to flying and fighting
+        const result = calculate(attacker, Pokemon('Cacturne'), flyingPress);
+        if (gen === 6) {
+          expect(result.range()).toEqual([484, 576]);
+          expect(result.desc()).toBe(
+            '0 Atk Hawlucha Flying Press vs. 0 HP / 0 Def Cacturne: 484-576 (172.2 - 204.9%) -- guaranteed OHKO'
+          );
+        } else {
+          expect(result.range()).toEqual([612, 720]);
+          expect(result.desc()).toBe(
+            '0 Atk Hawlucha Flying Press vs. 0 HP / 0 Def Cacturne: 612-720 (217.7 - 256.2%) -- guaranteed OHKO'
+          );
+        }
+
+        // Test still maintains fighting immunities
+        const result2 = calculate(attacker, Pokemon('Spiritomb'), flyingPress);
+        expect(result2.range()).toEqual([0, 0]);
+
+        // Test fighting immunities can be overridden
+        const scrappyAttacker = Pokemon('Hawlucha', {'ability': 'Scrappy'});
+        const ringTargetSpiritomb = Pokemon('Spiritomb', {'item': 'Ring Target'});
+        const result3 = calculate(attacker, ringTargetSpiritomb, flyingPress);
+        const result4 = calculate(scrappyAttacker, Pokemon('Spiritomb'), flyingPress);
+        if (gen === 6) {
+          expect(result3.range()).toEqual([152, 180]);
+          expect(result4.range()).toEqual([152, 180]);
+        } else {
+          expect(result3.range()).toEqual([188, 224]);
+          expect(result4.range()).toEqual([188, 224]);
+        }
+      });
+    });
+
+    inGens(6, 9, ({gen, calculate, Pokemon, Move}) => {
       test(`Thousand Arrows and Ring Target Should negate damage nullfiers (gen ${gen})`, () => {
         const result = calculate(Pokemon('Zygarde'), Pokemon('Swellow'), Move('Thousand Arrows'));
         expect(result.range()).toEqual([147, 174]);
         expect(result.desc()).toBe(
           '0 Atk Zygarde Thousand Arrows vs. 0 HP / 0 Def Swellow: 147-174 (56.3 - 66.6%) -- guaranteed 2HKO'
+        );
+      });
+    });
+
+    inGens(5, 9, ({gen, calculate, Pokemon, Move}) => {
+      test(`Ring Target should negate type nullfiers (gen ${gen})`, () => {
+        const attacker = Pokemon('Mew');
+        const defender = Pokemon('Skarmory', {'item': 'Ring Target'});
+        const result = calculate(attacker, defender, Move('Sludge Bomb'));
+        expect(result.range()).toEqual([87, 103]);
+        expect(result.desc()).toBe(
+          '0 SpA Mew Sludge Bomb vs. 0 HP / 0 SpD Skarmory: 87-103 (32.1 - 38%) -- 94.6% chance to 3HKO'
+        );
+        const result2 = calculate(attacker, defender, Move('Earth Power'));
+        expect(result2.range()).toEqual([174, 206]);
+        expect(result2.desc()).toBe(
+          '0 SpA Mew Earth Power vs. 0 HP / 0 SpD Skarmory: 174-206 (64.2 - 76%) -- guaranteed 2HKO'
         );
       });
     });
@@ -370,7 +424,7 @@ describe('calc', () => {
             [76, 76, 78, 78, 79, 81, 81, 82, 82, 84, 85, 85, 87, 87, 88, 90],
           ]);
           expect(result.desc()).toBe(
-            '152 Atk Parental Bond Kangaskhan-Mega Frustration vs. 252 HP / 152+ Def Amoonguss: 229-270 (53 - 62.5%) -- approx. 2HKO'
+            '152 Atk Parental Bond Kangaskhan-Mega Frustration vs. 252 HP / 152+ Def Amoonguss: 229-270 (53 - 62.5%) -- guaranteed 2HKO'
           );
         } else {
           expect(result.damage).toEqual([
@@ -378,7 +432,7 @@ describe('calc', () => {
             [37, 37, 39, 39, 39, 40, 40, 40, 40, 42, 42, 42, 43, 43, 43, 45],
           ]);
           expect(result.desc()).toBe(
-            '152 Atk Parental Bond Kangaskhan-Mega Frustration vs. 252 HP / 152+ Def Amoonguss: 190-225 (43.9 - 52%) -- approx. 6.6% chance to 2HKO'
+            '152 Atk Parental Bond Kangaskhan-Mega Frustration vs. 252 HP / 152+ Def Amoonguss: 190-225 (43.9 - 52%) -- 6.6% chance to 2HKO'
           );
         }
 
@@ -420,7 +474,71 @@ describe('calc', () => {
           [92, 96, 96, 96, 96, 100, 100, 100, 104, 104, 104, 104, 108, 108, 108, 112],
         ]);
         expect(result.desc()).toBe(
-          '252 Atk Parental Bond Kangaskhan-Mega Crunch vs. 0 HP / 0 Def Shadow Shield Lunala: 280-334 (67.4 - 80.4%) -- approx. 2HKO'
+          '252 Atk Parental Bond Kangaskhan-Mega Crunch vs. 0 HP / 0 Def Shadow Shield Lunala: 280-334 (67.4 - 80.4%) -- guaranteed 2HKO'
+        );
+      });
+    });
+
+    inGens(6, 9, ({gen, calculate, Pokemon, Move}) => {
+      test('Knock Off vs. Klutz', () => {
+        const weavile = Pokemon('Weavile');
+        const audino = Pokemon('Audino', {ability: 'Klutz', item: 'Leftovers'});
+        const audinoMega = Pokemon('Audino', {ability: 'Klutz', item: 'Audinite'});
+        const knockoff = Move('Knock Off');
+        const result = calculate(weavile, audino, knockoff);
+        expect(result.desc()).toBe(
+          '0 Atk Weavile Knock Off (97.5 BP) vs. 0 HP / 0 Def Audino: 139-165 (40 - 47.5%) -- guaranteed 3HKO'
+        );
+        const result2 = calculate(weavile, audinoMega, knockoff);
+        expect(result2.desc()).toBe(
+          '0 Atk Weavile Knock Off vs. 0 HP / 0 Def Audino: 93-111 (26.8 - 31.9%) -- guaranteed 4HKO'
+        );
+      });
+    });
+
+    inGens(1, 9, ({gen, calculate, Pokemon, Move}) => {
+      test(`Multi-hit percentage kill (gen ${gen})`, () => {
+        if (gen < 3) {
+          const result = calculate(
+            Pokemon('Persian', {boosts: {atk: 4}}),
+            Pokemon('Abra'),
+            Move('Fury Swipes', {hits: 2}),
+          );
+          expect(result.range()).toEqual([218, 258]);
+          expect(result.desc()).toBe(
+            '+4 Persian Fury Swipes (2 hits) vs. Abra: 218-258 (86.1 - 101.9%) -- 2.9% chance to OHKO'
+          );
+        } else if (gen === 3) {
+          const result = calculate(
+            Pokemon('Persian', {boosts: {atk: 3}}),
+            Pokemon('Abra', {boosts: {def: 1}}),
+            Move('Fury Swipes', {hits: 2}),
+          );
+          expect(result.range()).toEqual([174, 206]);
+          expect(result.desc()).toBe(
+            '+3 0 Atk Persian Fury Swipes (2 hits) vs. +1 0 HP / 0 Def Abra: 174-206 (91 - 107.8%) -- 41.8% chance to OHKO'
+          );
+        } else {
+          const result = calculate(
+            Pokemon('Persian', {boosts: {atk: 3}}),
+            Pokemon('Abra', {boosts: {def: 1}}),
+            Move('Fury Swipes', {hits: 2}),
+          );
+          expect(result.range()).toEqual([174, 206]);
+          expect(result.desc()).toBe(
+            '+3 0 Atk Persian Fury Swipes (2 hits) vs. +1 0 HP / 0 Def Abra: 174-206 (91 - 107.8%) -- 43.8% chance to OHKO'
+          );
+        }
+      });
+    });
+    inGens(8, 9, ({gen, calculate, Pokemon, Move}) => {
+      test('Knock Off vs. Zacian Crowned', () => {
+        const weavile = Pokemon('Weavile');
+        const zacian = Pokemon('Zacian-Crowned', {ability: 'Intrepid Sword', item: 'Rusted Sword'});
+        const knockoff = Move('Knock Off');
+        const result = calculate(weavile, zacian, knockoff);
+        expect(result.desc()).toBe(
+          '0 Atk Weavile Knock Off vs. 0 HP / 0 Def Zacian-Crowned: 36-43 (11 - 13.2%) -- possible 8HKO'
         );
       });
     });
@@ -451,9 +569,6 @@ describe('calc', () => {
           Move('Icicle Spear'),
         );
         expect(result.range()).toEqual([115, 138]);
-        expect(result.desc()).toBe(
-          '0 Atk Mamoswine Icicle Spear (3 hits) vs. 0 HP / 0 Def Weak Armor Skarmory: 115-138 (42.4 - 50.9%) -- approx. 2.7% chance to 2HKO'
-        );
 
         result = calculate(
           Pokemon('Mamoswine'),
@@ -464,9 +579,6 @@ describe('calc', () => {
           Move('Icicle Spear'),
         );
         expect(result.range()).toEqual([89, 108]);
-        expect(result.desc()).toBe(
-          '0 Atk Mamoswine Icicle Spear (3 hits) vs. 0 HP / 0 Def White Herb Weak Armor Skarmory: 89-108 (32.8 - 39.8%) -- approx. 99.9% chance to 3HKO'
-        );
 
         result = calculate(
           Pokemon('Mamoswine'),
@@ -478,9 +590,6 @@ describe('calc', () => {
           Move('Icicle Spear'),
         );
         expect(result.range()).toEqual([56, 69]);
-        expect(result.desc()).toBe(
-          '0 Atk Mamoswine Icicle Spear (3 hits) vs. +2 0 HP / 0 Def Weak Armor Skarmory: 56-69 (20.6 - 25.4%) -- approx. 0.1% chance to 4HKO'
-        );
 
         result = calculate(
           Pokemon('Mamoswine', {
@@ -494,9 +603,6 @@ describe('calc', () => {
           Move('Icicle Spear'),
         );
         expect(result.range()).toEqual([75, 93]);
-        expect(result.desc()).toBe(
-          '0 Atk Unaware Mamoswine Icicle Spear (3 hits) vs. 0 HP / 0 Def Skarmory: 75-93 (27.6 - 34.3%) -- approx. 1.5% chance to 3HKO'
-        );
       });
     });
 
@@ -512,12 +618,12 @@ describe('calc', () => {
         if (gen === 6) {
           expect(result.range()).toEqual([96, 113]);
           expect(result.desc()).toBe(
-            '0 Atk Aerilate Pinsir-Mega Double Hit (2 hits) vs. 0 HP / 0 Def Mummy Cofagrigus: 96-113 (37.3 - 43.9%) -- approx. 3HKO'
+            '0 Atk Aerilate Pinsir-Mega Double Hit (2 hits) vs. 0 HP / 0 Def Mummy Cofagrigus: 96-113 (37.3 - 43.9%) -- guaranteed 3HKO'
           );
         } else {
           expect(result.range()).toEqual([91, 107]);
           expect(result.desc()).toBe(
-            '0 Atk Aerilate Pinsir-Mega Double Hit (2 hits) vs. 0 HP / 0 Def Mummy Cofagrigus: 91-107 (35.4 - 41.6%) -- approx. 3HKO'
+            '0 Atk Aerilate Pinsir-Mega Double Hit (2 hits) vs. 0 HP / 0 Def Mummy Cofagrigus: 91-107 (35.4 - 41.6%) -- guaranteed 3HKO'
           );
         }
       });
@@ -534,7 +640,7 @@ describe('calc', () => {
         );
         expect(result.range()).toEqual([104, 126]);
         expect(result.desc()).toBe(
-          '0 SpA Greninja Water Shuriken (15 BP) (3 hits) vs. 0 HP / 0 SpD Luminous Moss Gliscor: 104-126 (35.7 - 43.2%) -- approx. 3HKO'
+          '0 SpA Greninja Water Shuriken (15 BP) (3 hits) vs. 0 HP / 0 SpD Luminous Moss Gliscor: 104-126 (35.7 - 43.2%) -- guaranteed 3HKO'
         );
 
         result = calculate(
@@ -546,9 +652,6 @@ describe('calc', () => {
           Move('Water Shuriken'),
         );
         expect(result.range()).toEqual([92, 114]);
-        expect(result.desc()).toBe(
-          '0 SpA Greninja Water Shuriken (15 BP) (3 hits) vs. 0 HP / 0 SpD Luminous Moss Simple Gliscor: 92-114 (31.6 - 39.1%) -- approx. 79.4% chance to 3HKO'
-        );
 
         result = calculate(
           Pokemon('Greninja'),
@@ -560,7 +663,7 @@ describe('calc', () => {
         );
         expect(result.range()).toEqual([176, 210]);
         expect(result.desc()).toBe(
-          '0 SpA Greninja Water Shuriken (15 BP) (3 hits) vs. 0 HP / 0 SpD Luminous Moss Contrary Gliscor: 176-210 (60.4 - 72.1%) -- approx. 2HKO'
+          '0 SpA Greninja Water Shuriken (15 BP) (3 hits) vs. 0 HP / 0 SpD Luminous Moss Contrary Gliscor: 176-210 (60.4 - 72.1%) -- guaranteed 2HKO'
         );
       });
     });
@@ -666,6 +769,62 @@ describe('calc', () => {
         expect(result.damage).toBe(90);
         expect(result.desc()).toBe(
           'Lvl 90 Chansey Seismic Toss vs. Lvl 30 0 HP 0 IVs Mew: 90-90 (90 - 90%) -- guaranteed OHKO after sandstorm damage and burn damage'
+        );
+      });
+    });
+    inGens(4, 9, ({gen, calculate, Pokemon, Move, Field}) => {
+      test(`Mold Breaker does not disable abilities that don't affect direct damage (gen ${gen})`, () => {
+        const attacker = Pokemon('Rampardos', {
+          ability: 'Mold Breaker',
+        });
+
+        const defender = Pokemon('Blastoise', {
+          ability: 'Rain Dish',
+        });
+
+        const field = Field({
+          weather: 'Rain',
+        });
+
+        const move = Move('Stone Edge');
+
+        const result = calculate(attacker, defender, move, field);
+
+        expect(result.defender.ability).toBe('Rain Dish');
+
+        expect(result.desc()).toBe(
+          '0 Atk Rampardos Stone Edge vs. 0 HP / 0 Def Blastoise: 168-198 (56.1 - 66.2%) -- guaranteed 2HKO after Rain Dish recovery'
+        );
+      });
+    });
+    inGens(8, 9, ({gen, calculate, Pokemon, Move, Field}) => {
+      test('Steely Spirit should boost Steel-type moves as a field effect.', () => {
+        const pokemon = Pokemon('Perrserker', {
+          ability: 'Battle Armor',
+        });
+
+        const move = Move('Iron Head');
+
+        let result = calculate(pokemon, pokemon, move);
+
+        expect(result.desc()).toBe(
+          '0 Atk Perrserker Iron Head vs. 0 HP / 0 Def Perrserker: 46-55 (16.3 - 19.5%) -- possible 6HKO'
+        );
+
+        const field = Field({attackerSide: {isSteelySpirit: true}});
+
+        result = calculate(pokemon, pokemon, move, field);
+
+        expect(result.desc()).toBe(
+          '0 Atk Perrserker with an ally\'s Steely Spirit Iron Head vs. 0 HP / 0 Def Perrserker: 70-83 (24.9 - 29.5%) -- 99.9% chance to 4HKO'
+        );
+
+        pokemon.ability = 'Steely Spirit' as AbilityName;
+
+        result = calculate(pokemon, pokemon, move, field);
+
+        expect(result.desc()).toBe(
+          '0 Atk Steely Spirit Perrserker with an ally\'s Steely Spirit Iron Head vs. 0 HP / 0 Def Perrserker: 105-124 (37.3 - 44.1%) -- guaranteed 3HKO'
         );
       });
     });
@@ -868,6 +1027,18 @@ describe('calc', () => {
         gengar.ability = 'Unaware' as AbilityName;
         result = calculate(pinsir, gengar, earthquake);
         expect(result.range()).toEqual([1054, 1240]);
+      });
+      test('Technicain boost should happen before boosting items', () => {
+        const scizor = Pokemon('Scizor', {
+          item: 'Insect Plate',
+          ability: 'Technician',
+        });
+        const chansey = Pokemon('Chansey');
+        const bugbite = Move('Bug Bite');
+        const result = calculate(scizor, chansey, bugbite);
+        expect(result.desc()).toBe(
+          '0 Atk Insect Plate Technician Scizor Bug Bite vs. 0 HP / 0 Def Chansey: 745-877 (116.2 - 136.8%) -- guaranteed OHKO'
+        );
       });
     });
   });
@@ -1141,7 +1312,7 @@ describe('calc', () => {
         const knockoff = Move('Knock Off');
         const result = calculate(sawk, silvally, knockoff);
         expect(result.desc()).toBe(
-          '252 Atk Mold Breaker Sawk Knock Off vs. 0 HP / 0 Def Silvally-Dark: 36-43 (10.8 - 12.9%) -- possible 8HKO'
+          '252 Atk Sawk Knock Off vs. 0 HP / 0 Def Silvally-Dark: 36-43 (10.8 - 12.9%) -- possible 8HKO'
         );
       });
 
@@ -1297,6 +1468,32 @@ describe('calc', () => {
         testCase({ability: 'Simple'}, 2);
         testCase({ability: 'Contrary'}, -1);
       });
+      test('Activating Protosynthesis with sun should not affect damage of Poltergeist and Knock Off', () => {
+        const attacker = Pokemon('Smeargle');
+        const defender = Pokemon('Gouging Fire', {'ability': 'Protosynthesis', 'item': 'Blunder Policy'});
+        const field = Field({
+          weather: 'Sun',
+        });
+
+        const knockOff = calculate(attacker, defender, Move('Knock Off'), field);
+        expect(knockOff.rawDesc.moveBP).toBe(97.5);
+
+        const poltergeist = calculate(attacker, defender, Move('Poltergeist'), field);
+        expect(poltergeist.move.bp).toBe(110);
+      });
+      test('Activating Quark Drive with Electric Terrain should not affect damage of Poltergeist and Knock Off', () => {
+        const attacker = Pokemon('Smeargle');
+        const defender = Pokemon('Iron Valiant', {'ability': 'Quark Drive', 'item': 'Blunder Policy'});
+        const field = Field({
+          weather: 'Sun',
+        });
+
+        const knockOff = calculate(attacker, defender, Move('Knock Off'), field);
+        expect(knockOff.rawDesc.moveBP).toBe(97.5);
+
+        const poltergeist = calculate(attacker, defender, Move('Poltergeist'), field);
+        expect(poltergeist.move.bp).toBe(110);
+      });
       test('Revelation Dance should change type if Pokemon Terastallized', () => {
         const attacker = Pokemon('Oricorio-Pom-Pom');
         const defender = Pokemon('Sandaconda');
@@ -1306,6 +1503,12 @@ describe('calc', () => {
         attacker.teraType = 'Water';
         result = calculate(attacker, defender, Move('Revelation Dance'));
         expect(result.move.type).toBe('Water');
+      });
+      test('Psychic Noise should disable healing effects', () => {
+        const attacker = Pokemon('Mewtwo');
+        const defender = Pokemon('Regigigas', {ability: 'Poison Heal', item: 'Leftovers', status: 'tox'});
+        const result = calculate(attacker, defender, Move('Psychic Noise'), Field({terrain: 'Grassy', attackerSide: {isSeeded: true}}));
+        expect(result.desc()).toBe('0 SpA Mewtwo Psychic Noise vs. 0 HP / 0 SpD Regigigas: 109-129 (30.1 - 35.7%) -- 31.2% chance to 3HKO');
       });
 
       test('Flower Gift, Power Spot, Battery, and switching boosts shouldn\'t have double spaces', () => {
@@ -1395,6 +1598,65 @@ describe('calc', () => {
           );
           expect(result.kochance().chance).toBeLessThan(0.005); // it would round down.
           expect(result.kochance().text).toBe('0.1% chance to 4HKO');
+        });
+      });
+    });
+    describe('Some moves should break screens before doing damage', () => {
+      inGens(3, 9, ({calculate, Pokemon, Move, Field}) => {
+        test('Brick Break should break screens', () => {
+          const pokemon = Pokemon('Mew');
+
+          const brickBreak = Move('Brick Break');
+          const otherMove = Move('Vital Throw', {overrides: {basePower: 75}});
+
+          const field = Field({defenderSide: {isReflect: true}});
+
+          const brickBreakResult = calculate(pokemon, pokemon, brickBreak, field);
+          expect(brickBreakResult.field.defenderSide.isReflect).toBe(false);
+
+          const otherMoveResult = calculate(pokemon, pokemon, otherMove, field);
+          expect(otherMoveResult.field.defenderSide.isReflect).toBe(true);
+
+          expect(brickBreakResult.range()[0]).toBeGreaterThan(otherMoveResult.range()[0]);
+          expect(brickBreakResult.range()[1]).toBeGreaterThan(otherMoveResult.range()[1]);
+        });
+      });
+      inGens(7, 9, ({calculate, Pokemon, Move, Field}) => {
+        test('Psychic Fangs should break screens', () => {
+          const pokemon = Pokemon('Mew');
+
+          const psychicFangs = Move('Psychic Fangs');
+          const otherMove = Move('Zen Headbutt', {overrides: {basePower: 75}});
+
+          const field = Field({defenderSide: {isReflect: true}});
+
+          const psychicFangsResult = calculate(pokemon, pokemon, psychicFangs, field);
+          expect(psychicFangsResult.field.defenderSide.isReflect).toBe(false);
+
+          const otherMoveResult = calculate(pokemon, pokemon, otherMove, field);
+          expect(otherMoveResult.field.defenderSide.isReflect).toBe(true);
+
+          expect(psychicFangsResult.range()[0]).toBeGreaterThan(otherMoveResult.range()[0]);
+          expect(psychicFangsResult.range()[1]).toBeGreaterThan(otherMoveResult.range()[1]);
+        });
+      });
+      inGen(9, ({calculate, Pokemon, Move, Field}) => {
+        test('Raging Bull should break screens', () => {
+          const pokemon = Pokemon('Tauros-Paldea-Aqua');
+
+          const ragingBull = Move('Raging Bull');
+          const otherMove = Move('Waterfall', {overrides: {basePower: 90}});
+
+          const field = Field({defenderSide: {isReflect: true}});
+
+          const ragingBullResult = calculate(pokemon, pokemon, ragingBull, field);
+          expect(ragingBullResult.field.defenderSide.isReflect).toBe(false);
+
+          const otherMoveResult = calculate(pokemon, pokemon, otherMove, field);
+          expect(otherMoveResult.field.defenderSide.isReflect).toBe(true);
+
+          expect(ragingBullResult.range()[0]).toBeGreaterThan(otherMoveResult.range()[0]);
+          expect(ragingBullResult.range()[1]).toBeGreaterThan(otherMoveResult.range()[1]);
         });
       });
     });

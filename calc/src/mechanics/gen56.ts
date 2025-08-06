@@ -97,7 +97,26 @@ export function calculateBWXY(
     return result;
   }
 
-  if (attacker.hasAbility('Mold Breaker', 'Teravolt', 'Turboblaze')) {
+  const defenderAbilityIgnored = defender.hasAbility(
+    'Aroma Veil', 'Aura Break', 'Battle Armor', 'Big Pecks',
+    'Bulletproof', 'Clear Body', 'Contrary', 'Damp',
+    'Dark Aura', 'Dry Skin', 'Fairy Aura', 'Filter',
+    'Flash Fire', 'Flower Gift', 'Flower Veil', 'Friend Guard',
+    'Fur Coat', 'Grass Pelt', 'Heatproof', 'Heavy Metal',
+    'Hyper Cutter', 'Immunity', 'Inner Focus', 'Insomnia',
+    'Keen Eye', 'Leaf Guard', 'Levitate', 'Light Metal',
+    'Lightning Rod', 'Limber', 'Magic Bounce', 'Magma Armor',
+    'Marvel Scale', 'Motor Drive', 'Multiscale', 'Oblivious',
+    'Overcoat', 'Own Tempo', 'Sand Veil', 'Sap Sipper',
+    'Shell Armor', 'Shield Dust', 'Simple', 'Snow Cloak',
+    'Solid Rock', 'Soundproof', 'Sticky Hold', 'Storm Drain',
+    'Sturdy', 'Suction Cups', 'Sweet Veil', 'Tangled Feet',
+    'Telepathy', 'Thick Fat', 'Unaware', 'Vital Spirit',
+    'Volt Absorb', 'Water Absorb', 'Water Veil', 'White Smoke',
+    'Wonder Guard', 'Wonder Skin'
+  );
+
+  if (attacker.hasAbility('Mold Breaker', 'Teravolt', 'Turboblaze') && defenderAbilityIgnored) {
     defender.ability = '' as AbilityName;
     desc.attackerAbility = attacker.ability;
   }
@@ -135,6 +154,9 @@ export function calculateBWXY(
         : field.hasTerrain('Misty') ? 'Fairy'
         : 'Normal';
     }
+  } else if (move.named('Brick Break')) {
+    field.defenderSide.isReflect = false;
+    field.defenderSide.isLightScreen = false;
   }
 
   let hasAteAbilityTypeChange = false;
@@ -171,10 +193,13 @@ export function calculateBWXY(
   }
 
   const isGhostRevealed = attacker.hasAbility('Scrappy') || field.defenderSide.isForesight;
+  const isRingTarget = defender.hasItem('Ring Target') && !defender.hasAbility('Klutz');
   const type1Effectiveness =
-    getMoveEffectiveness(gen, move, defender.types[0], isGhostRevealed, field.isGravity);
+    getMoveEffectiveness(gen, move, defender.types[0], isGhostRevealed, field.isGravity,
+      isRingTarget);
   const type2Effectiveness = defender.types[1]
-    ? getMoveEffectiveness(gen, move, defender.types[1], isGhostRevealed, field.isGravity)
+    ? getMoveEffectiveness(gen, move, defender.types[1], isGhostRevealed, field.isGravity,
+      isRingTarget)
     : 1;
   let typeEffectiveness = type1Effectiveness * type2Effectiveness;
 
@@ -183,13 +208,6 @@ export function calculateBWXY(
   } else if (typeEffectiveness === 0 && move.hasType('Ground') &&
     defender.hasItem('Iron Ball') && !defender.hasAbility('Klutz')) {
     typeEffectiveness = 1;
-  } else if (typeEffectiveness === 0 && defender.hasItem('Ring Target')) {
-    const effectiveness = gen.types.get(toID(move.type))!.effectiveness;
-    if (effectiveness[defender.types[0]]! === 0) {
-      typeEffectiveness = type2Effectiveness;
-    } else if (defender.types[1] && effectiveness[defender.types[1]]! === 0) {
-      typeEffectiveness = type1Effectiveness;
-    }
   }
 
   if (typeEffectiveness === 0) {
@@ -291,6 +309,7 @@ export function calculateBWXY(
   const attackStat = move.category === 'Special' ? 'spa' : 'atk';
 
   // #endregion
+
   // #region (Special) Defense
 
   const defense = calculateDefenseBWXY(gen, attacker, defender, move, field, desc, isCritical);
@@ -346,21 +365,23 @@ export function calculateBWXY(
     desc.attackerAbility = attacker.ability;
   }
 
-  let damage: number[] = [];
+  const damage: number[] = [];
   for (let i = 0; i < 16; i++) {
     damage[i] =
       getFinalDamage(baseDamage, i, typeEffectiveness, applyBurn, stabMod, finalMod);
   }
+  result.damage = childDamage ? [damage, childDamage] : damage;
 
   desc.attackBoost =
     move.named('Foul Play') ? defender.boosts[attackStat] : attacker.boosts[attackStat];
 
-  if ((move.dropsStats && move.timesUsed! > 1) || move.hits > 1) {
+  if (move.timesUsed! > 1 || move.hits > 1) {
+    const damageMatrix = [damage];
     // store boosts so intermediate boosts don't show.
     const origDefBoost = desc.defenseBoost;
     const origAtkBoost = desc.attackBoost;
     let numAttacks = 1;
-    if (move.dropsStats && move.timesUsed! > 1) {
+    if (move.timesUsed! > 1) {
       desc.moveTurns = `over ${move.timesUsed} turns`;
       numAttacks = move.timesUsed!;
     } else {
@@ -378,7 +399,7 @@ export function calculateBWXY(
       hasAteAbilityTypeChange = hasAteAbilityTypeChange &&
       attacker.hasAbility('Aerilate', 'Galvanize', 'Pixilate', 'Refrigerate');
 
-      if ((move.dropsStats && move.timesUsed! > 1)) {
+      if (move.timesUsed! > 1) {
         // Adaptability does not change between hits of a multihit, only between turns
         stabMod = getStabMod(attacker, move, desc);
       }
@@ -412,29 +433,28 @@ export function calculateBWXY(
       );
       const newFinalMod = chainMods(newFinalMods, 41, 131072);
 
-      let damageMultiplier = 0;
-      damage = damage.map(affectedAmount => {
+      const damageArray: number[] = [];
+      for (let i = 0; i < 16; i++) {
         const newFinalDamage = getFinalDamage(
           newBaseDamage,
-          damageMultiplier,
+          i,
           typeEffectiveness,
           applyBurn,
           stabMod,
           newFinalMod
         );
-        damageMultiplier++;
-        return affectedAmount + newFinalDamage;
-      });
+        damageArray[i] = newFinalDamage;
+      }
+      damageMatrix[times] = damageArray;
       if (mods?.hitBasePowers?.length) {
         totalModBp += (desc.moveBP || 0);
       }
     }
+    result.damage = damageMatrix;
     desc.moveBP = totalModBp;
     desc.defenseBoost = origDefBoost;
     desc.attackBoost = origAtkBoost;
   }
-
-  result.damage = childDamage ? [damage, childDamage] : damage;
 
   // #endregion
 
@@ -598,7 +618,8 @@ export function calculateBasePowerBWXY(
     desc,
     basePower,
     hasAteAbilityTypeChange,
-    turnOrder
+    turnOrder,
+    hit
   );
 
   basePower = OF16(Math.max(1, pokeRound((basePower * chainMods(bpMods, 41, 2097152)) / 4096)));
@@ -615,23 +636,31 @@ export function calculateBPModsBWXY(
   desc: RawDesc,
   basePower: number,
   hasAteAbilityTypeChange: boolean,
-  turnOrder: string
+  turnOrder: string,
+  hit: number
 ) {
   const bpMods = [];
 
+  const defenderItem = (defender.item && defender.item !== '')
+    ? defender.item : defender.disabledItem;
   let resistedKnockOffDamage =
-    !defender.item ||
-    (defender.named('Giratina-Origin') && defender.hasItem('Griseous Orb')) ||
-    (defender.name.includes('Arceus') && defender.item.includes('Plate')) ||
-    (defender.name.includes('Genesect') && defender.item.includes('Drive')) ||
-    (defender.named('Groudon', 'Groudon-Primal') && defender.hasItem('Red Orb')) ||
-    (defender.named('Kyogre', 'Kyogre-Primal') && defender.hasItem('Blue Orb'));
+    !defenderItem ||
+    (defender.named('Giratina-Origin') && defenderItem === 'Griseous Orb') ||
+    (defender.name.includes('Arceus') && defenderItem.includes('Plate')) ||
+    (defender.name.includes('Genesect') && defenderItem.includes('Drive')) ||
+    (defender.named('Groudon', 'Groudon-Primal') && defenderItem === 'Red Orb') ||
+    (defender.named('Kyogre', 'Kyogre-Primal') && defenderItem === 'Blue Orb');
 
   // The last case only applies when the Pokemon is holding the Mega Stone that matches its species
   // (or when it's already a Mega-Evolution)
-  if (!resistedKnockOffDamage && defender.item) {
-    const item = gen.items.get(toID(defender.item))!;
+  if (!resistedKnockOffDamage && defenderItem) {
+    const item = gen.items.get(toID(defenderItem))!;
     resistedKnockOffDamage = !!(item.megaEvolves && defender.name.includes(item.megaEvolves));
+  }
+
+  // Resist knock off damage if your item was already knocked off
+  if (!resistedKnockOffDamage && hit > 1 && !defender.hasAbility('Sticky Hold')) {
+    resistedKnockOffDamage = true;
   }
 
 
@@ -923,17 +952,20 @@ export function calculateDefenseBWXY(
   let defense: number;
   const defenseStat = move.overrideDefensiveStat || (move.category === 'Physical' ? 'def' : 'spd');
   const hitsPhysical = defenseStat === 'def';
+  const boosts = defender.boosts[
+    field.isWonderRoom ? defenseStat === 'spd' ? 'def' : 'spd' : defenseStat
+  ];
   desc.defenseEVs = getStatDescriptionText(gen, defender, defenseStat, defender.nature);
-  if (defender.boosts[defenseStat] === 0 ||
-    (isCritical && defender.boosts[defenseStat] > 0) ||
+  if (boosts === 0 ||
+    (isCritical && boosts > 0) ||
     move.ignoreDefensive) {
     defense = defender.rawStats[defenseStat];
   } else if (attacker.hasAbility('Unaware')) {
     defense = defender.rawStats[defenseStat];
     desc.attackerAbility = attacker.ability;
   } else {
-    defense = getModifiedStat(defender.rawStats[defenseStat]!, defender.boosts[defenseStat]!);
-    desc.defenseBoost = defender.boosts[defenseStat];
+    defense = getModifiedStat(defender.rawStats[defenseStat]!, boosts);
+    desc.defenseBoost = boosts;
   }
 
   // unlike all other defense modifiers, Sandstorm SpD boost gets applied directly

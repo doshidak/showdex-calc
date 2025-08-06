@@ -3,14 +3,13 @@
 
 <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
     <title>Pok&eacute;mon Damage Calculator</title>
-	 <link rel="icon" type="image/x-icon" href="./img/favicon.png">
-    <link type="text/css" rel="stylesheet" href="./css/vendor/bootstrap.css" />
-    <link type="text/css" rel="stylesheet" href="https://cdn.datatables.net/1.10.4/css/jquery.dataTables.min.css" />
-    <link type="text/css" rel="stylesheet" href="https://cdn.datatables.net/colvis/1.1.1/css/dataTables.colVis.css" />
+    <link rel="icon" type="image/x-icon" href="./img/favicon.png">
     <link type="text/css" rel="stylesheet" href="./js/vendor/select2/select2.css" />
     <link type="text/css" rel="stylesheet" href="./css/main.css?" />
-    <link type="text/css" rel="stylesheet" href="./css/dark-theme.css" id="dark-theme-styles">
+    <link type="text/css" rel="stylesheet" href="./css/vendor/bootstrap.css" />
+    <link type="text/css" rel="stylesheet" href="./css/dark-theme.css?" id="dark-theme-styles">
     <!-- Global site tag (gtag.js) - Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=UA-26211653-3"></script>
     <script>
@@ -27,13 +26,10 @@
     </script>
     <!-- Immediately loads the dark theme in order to reduce FOIT -->
     <script>
-        /*
-        * localStorage will only store strings
-        * This means that if it has the value 'false',
-        * It will be truey and incorrectly cause the
-        * dark theme to load.
-        */
-        if (localStorage.getItem('darkTheme') !== 'true') {
+        // localStorage will only store strings
+        // This means that if it has the value 'false',
+        // It will be truthy.
+        if ((localStorage.getItem('darkTheme') || '' + window.matchMedia('(prefers-color-scheme: dark)').matches) === 'false') {
             document.getElementById('dark-theme-styles').disabled = true;
         }
     </script>
@@ -41,19 +37,23 @@
 
 <body class="dark-theme">
 
-<div class="header"><div class="header-inner">
-    <ul class="nav">
-        <li><a class="button nav-first" href="//pokemonshowdown.com"><img src="./img/pokemonshowdownbeta.png" alt="Pok&eacute;mon Showdown! (beta)" /> Home</a></li>
-        <li><a class="button" href="//dex.pokemonshowdown.com">Pok&eacute;dex</a></li>
-        <li><a class="button" href="//replay.pokemonshowdown.com/">Replays</a></li>
-        <li><a class="button" href="//pokemonshowdown.com/ladder/">Ladder</a></li>
-        <li><a class="button nav-last" href="//pokemonshowdown.com/forums/">Forum</a></li>
-    </ul>
-    <ul class="nav nav-play">
+<header>
+    <div class="nav-wrapper"><ul class="nav">
+        <li><a class="button nav-first" href="//pokemonshowdown.com/"><img src="./img/pokemonshowdownbeta.png" srcset="./img/pokemonshowdownbeta.png 1x, ./img/pokemonshowdownbeta@2x.png 2x" alt="Pok&eacute;mon Showdown" width="146" height="44" /> Home</a></li>
+        <li><a class="button" href="//pokemonshowdown.com/dex/">Pok&eacute;dex</a></li>
+        <li><a class="button" href="//replay.pokemonshowdown.com/">Replay</a></li>
+        <li><a class="button purplebutton" href="//smogon.com/dex/" target="_blank">Strategy</a></li>
+        <li><a class="button nav-last purplebutton" href="//smogon.com/forums/" target="_blank">Forum</a></li>
         <li><a class="button greenbutton nav-first nav-last" href="//play.pokemonshowdown.com/">Play</a></li>
-    </ul>
-    <div style="clear:both"></div>
-</div></div>
+    </ul></div>
+</header>
+
+<!-- START WRAPPER -->
+<style>
+    @import url(https://cdn.datatables.net/1.10.4/css/jquery.dataTables.min.css);
+    @import url(https://cdn.datatables.net/colvis/1.1.1/css/dataTables.colVis.css);
+</style>
+
 <div class="wrapper">
 
     <span class="title-text main-title-text">Pok&eacute;mon Damage Calculator</span>
@@ -91,11 +91,9 @@
             <input class="visually-hidden" type="checkbox" name="tier" id="RU" /><label class="btn btn-mid gen-specific g5 g6 g7 g8 g9" for="RU">RU</label>
             <input class="visually-hidden" type="checkbox" name="tier" id="UU" /><label class="btn btn-mid" for="UU">UU</label>
             <input class="visually-hidden" type="checkbox" name="tier" id="OU" /><label class="btn btn-mid" for="OU">OU</label>
-            <input class="visually-hidden" type="checkbox" name="tier" id="Uber" /><label class="btn btn-right" for="Uber">Uber</label>
+            <input class="visually-hidden" type="checkbox" name="tier" id="Ubers" /><label class="btn btn-right" for="Ubers">Ubers</label>
     </span>
     </div>
-
-</div>
 
 	<div class="flex-parent">
 		<div class="panel-group" id="accordion">
@@ -381,6 +379,16 @@
                                 <td><span class="totalMod">---</span>
                                 </td>
                             </tr>
+                            <tr class="totalevs">
+                                <th scope="row">
+                                    <label>Total</label>
+                                </th>
+                                <td></td>
+                                <td></td>
+                                <td class="gen-specific g3 g4 g5 g6 g7 g8 g9">
+                                    <span class="evs calc-trigger">0</span>
+                                </td>
+                            </tr>
                         </table>
                     </div>
                     <div class="info-group info-selectors">
@@ -499,7 +507,7 @@
                             <option value="4">4 hits</option>
                             <option value="5">5 hits</option>
                         </select>
-                        <select class="stat-drops calc-trigger hide" title="How many times was this move used in a row?">>
+                        <select class="move-times calc-trigger hide" title="How many times was this move used in a row?">>
                             <option value="1">Once</option>
                             <option value="2">Twice</option>
                             <option value="3">3 times</option>
@@ -535,7 +543,7 @@
                             <option value="4">4 hits</option>
                             <option value="5">5 hits</option>
                         </select>
-                        <select class="stat-drops calc-trigger hide" title="How many times was this move used in a row?">>
+                        <select class="move-times calc-trigger hide" title="How many times was this move used in a row?">>
                             <option value="1">Once</option>
                             <option value="2">Twice</option>
                             <option value="3">3 times</option>
@@ -571,7 +579,7 @@
                             <option value="4">4 hits</option>
                             <option value="5">5 hits</option>
                         </select>
-                        <select class="stat-drops calc-trigger hide" title="How many times was this move used in a row?">>
+                        <select class="move-times calc-trigger hide" title="How many times was this move used in a row?">>
                             <option value="1">Once</option>
                             <option value="2">Twice</option>
                             <option value="3">3 times</option>
@@ -607,7 +615,7 @@
                             <option value="4">4 hits</option>
                             <option value="5">5 hits</option>
                         </select>
-                        <select class="stat-drops calc-trigger hide" title="How many times was this move used in a row?">>
+                        <select class="move-times calc-trigger hide" title="How many times was this move used in a row?">>
                           <option value="1">Once</option>
                           <option value="2">Twice</option>
                           <option value="3">3 times</option>
@@ -638,25 +646,24 @@
                         <input class="visually-hidden" type="radio" name="format" value="Doubles" id="doubles-format" />
                         <label class="btn btn-right" for="doubles-format">Doubles</label>
                     </div>
-                    <div class="gen-specific g6 g7 g8 g9" title="Select the current terrain.">
-                        <input class="visually-hidden terrain-trigger calc-trigger" type="checkbox" name="terrain" value="Electric" id="electric" /><label class="btn btn-xxxwide btn-left" for="electric">Electric Terrain</label>
-                        <input class="visually-hidden terrain-trigger calc-trigger" type="checkbox" name="terrain" value="Grassy" id="grassy" /><label class="btn btn-xxxwide btn-mid" for="grassy">Grassy Terrain</label>
-                        <input class="visually-hidden terrain-trigger calc-trigger" type="checkbox" name="terrain" value="Misty" id="misty" /><label class="btn btn-xxxwide btn-right" for="misty">Misty Terrain</label>
+                    <div aria-labelledby="selectTerrainInstruction" class="gen-specific g6 g7 g8 g9" role="group" title="Select the current terrain.">
+                        <span class="visually-hidden" id="selectTerrainInstruction">Select the current terrain.</span>
+                        <input class="visually-hidden terrain-trigger calc-trigger" type="checkbox" name="terrain" value="Electric" id="electric" /><label class="btn btn-left" for="electric">Electric</label>
+                        <input class="visually-hidden terrain-trigger calc-trigger" type="checkbox" name="terrain" value="Grassy" id="grassy" /><label class="btn btn-mid" for="grassy">Grassy</label>
+                        <input class="visually-hidden terrain-trigger calc-trigger" type="checkbox" name="terrain" value="Misty" id="misty" /><label class="btn btn-mid" for="misty">Misty</label>
+                        <input class="visually-hidden terrain-trigger calc-trigger" type="checkbox" name="terrain" value="Psychic" id="psychic" /><label class="btn btn-xxxwide btn-right" for="psychic">Psychic Terrain</label>
                     </div>
-                    <div class="gen-specific g7 g8 g9" title="Select the current terrain.">
-                        <input class="visually-hidden terrain-trigger calc-trigger" type="checkbox" name="terrain" value="Psychic" id="psychic" /><label class="btn btn-xxxwide btn-mid" for="psychic">Psychic Terrain</label>
+                    <div aria-labelledby="selectRuinInstruction" class="gen-specific g9 format-specific doubles" role="group" style="margin: 5px auto auto;" title="Select the ruin abilities from other Pok&eacute;mon on the field.">
+                        <span class="visually-hidden" id="selectRuinInstruction">Select the active Ruin abilities from other Poke&eacute;mon on the field.</span>
+                        <input class="visually-hidden calc-trigger" type="checkbox" name="ruin" value="Beads" id="beads" />
+                        <label class="btn btn-left" for="beads">Beads</label>
+                        <input class="visually-hidden calc-trigger" type="checkbox" name="ruin" value="Tablets" id="tablets" />
+                        <label class="btn btn-mid" for="tablets">Tablets</label>
+                        <input class="visually-hidden calc-trigger" type="checkbox" name="ruin" value="Sword" id="sword" />
+                        <label class="btn btn-mid" for="sword">Sword</label>
+                        <input class="visually-hidden calc-trigger" type="checkbox" name="ruin" value="Vessel" id="vessel" />
+                        <label class="btn btn-xxxwide btn-right" for="vessel">Vessel of Ruin</label>
                     </div>
-						  <div aria-labelledby="selectRuinInstruction" class="gen-specific g9 format-specific doubles" role="group" style="margin: 5px auto auto;" title="Select the ruin abilities from other Pok&eacute;mon on the field.">
-								<span class="visually-hidden" id="selectRuinInstruction">Select the active Ruin abilities from other Poke&eacute;mon on the field.</span>
-								<input class="visually-hidden calc-trigger" type="checkbox" name="ruin" value="Beads" id="beads" />
-								<label class="btn btn-xxxwide btn-left" for="beads">Beads of Ruin</label>
-								<input class="visually-hidden calc-trigger" type="checkbox" name="ruin" value="Tablets" id="tablets" />
-								<label class="btn btn-xxxwide btn-mid" for="tablets">Tablets of Ruin</label>
-								<input class="visually-hidden calc-trigger" type="checkbox" name="ruin" value="Sword" id="sword" />
-								<label class="btn btn-xxxwide btn-right" for="sword">Sword of Ruin</label>
-								<input class="visually-hidden calc-trigger" type="checkbox" name="ruin" value="Vessel" id="vessel" />
-								<label class="btn btn-xxxwide btn-mid" for="vessel">Vessel of Ruin</label>
-						  </div>
                     <hr class="gen-specific g6 g7 g8 g9" />
                     <div class="gen-specific g3 g4 g5 g6 g7 g8 g9" style="width: 22.2em; margin: 5px auto;" title="Select the current weather condition.">
                         <input class="visually-hidden" type="radio" name="weather" value="" id="clear" checked="checked" />
@@ -793,6 +800,16 @@
                             <label class="btn btn-wide" for="leechSeedR">Leech Seed</label>
                         </div>
                     </div>
+                    <div class="btn-group">
+                        <div class="left" title="Has this Pok&eacute;mon been affected by Salt Cure?">
+                            <input class="visually-hidden" type="checkbox" id="saltCureL" />
+                            <label class="btn btn-wide" for="saltCureL">Salt Cure</label>
+                        </div>
+                        <div class="right" title="Has this Pok&eacute;mon been affected by Salt Cure?">
+                            <input class="visually-hidden" type="checkbox" id="saltCureR" />
+                            <label class="btn btn-wide" for="saltCureR">Salt Cure</label>
+                        </div>
+                    </div>
                     <div class="btn-group gen-specific g2 g3 g4 g5 g6 g7 g8 g9">
                         <div class="left" title="Has this Pok&eacute;mon been revealed with Foresight or Odor Sleuth?">
                             <input class="visually-hidden" type="checkbox" id="foresightL" />
@@ -909,10 +926,6 @@
     </div>
 	</div>
 
-
-    <script type="text/javascript">
-        var linkExtension = '.template.html';
-    </script>
     <!-- jquery.dataTables is incompatible with newer versions of jQuery -->
     <script type="text/javascript" src="./js/vendor/jquery-1.9.1.min.js"></script>
     <script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script> <!-- to be replaced (probably) -->
@@ -964,13 +977,20 @@
     <script type="text/javascript" src="./js/shared_controls.js?"></script>
     <script type="text/javascript" src="./js/honkalculate_controls.js?"></script>
 
-    <div style="clear:both;padding:20px;text-align:left">Created by Honko, maintained by Austin and Kris
-        <ul><li><a href="https://github.com/smogon/damage-calc/contributors" class="links-lighten" target="_blank">Contributors</a></li>
-        <li><a href="https://www.smogon.com/forums/threads/pok%C3%A9mon-showdown-damage-calculator.3593546/" class="links-lighten" target="_blank">Bug Reports</a></li>
-        <li><a href="https://github.com/smogon/damage-calc" class="links-lighten" target="_blank">GitHub repository</a></li></ul>
-        <button type="button" id="dark-theme-toggle"></button>
-        <script type="text/javascript" src="./js/dark-theme-toggle.js?"></script>
-    </div>
+</div>
+<!-- END WRAPPER -->
+
+<div class="credits">Created by Honko; maintained by Austin, Kris, <a href="https://github.com/smogon/damage-calc/contributors" class="links-lighten" target="_blank">and others</a>.
+    <ul><li><a href="https://www.smogon.com/forums/threads/pok%C3%A9mon-showdown-damage-calculator.3593546/" class="links-lighten" target="_blank">Bug Reports</a></li>
+    <li><a href="https://github.com/smogon/damage-calc" class="links-lighten" target="_blank">GitHub repository</a></li></ul>
+
+    <select id="dark-theme-toggle">
+        <option value="">Auto dark theme</option>
+        <option value="false">Light theme</option>
+        <option value="true">Dark theme</option>
+    </select>
+    <script type="text/javascript" src="./js/dark-theme-toggle.js?"></script>
+</div>
 
 </body>
 

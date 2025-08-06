@@ -121,7 +121,8 @@ export function calculateSMSSSV(
   if (defender.teraType !== 'Stellar') desc.defenderTera = defender.teraType;
 
   if (move.named('Photon Geyser', 'Light That Burns the Sky') ||
-      (move.named('Tera Blast') && attacker.teraType)) {
+      (move.named('Tera Blast') && attacker.teraType) ||
+      (move.named('Tera Starstorm') && attacker.teraType && attacker.named('Terapagos-Stellar'))) {
     move.category = attacker.stats.atk > attacker.stats.spa ? 'Physical' : 'Special';
   }
 
@@ -134,6 +135,11 @@ export function calculateSMSSSV(
   if (move.flags.punch && attacker.hasItem('Punching Glove')) {
     desc.attackerItem = attacker.item;
     move.flags.contact = 0;
+  }
+
+  if (move.named('Shell Side Arm') &&
+    getShellSideArmCategory(attacker, defender) === 'Physical') {
+    move.flags.contact = 1;
   }
 
   const breaksProtect = move.breaksProtect || move.isZ || attacker.isDynamaxed ||
@@ -151,12 +157,28 @@ export function calculateSMSSSV(
     return result;
   }
 
-  const defenderIgnoresAbility = defender.hasAbility(
-    'Full Metal Body',
-    'Prism Armor',
-    'Shadow Shield',
-    'Tablets of Ruin',
-    'Vessel of Ruin'
+  const defenderAbilityIgnored = defender.hasAbility(
+    'Armor Tail', 'Aroma Veil', 'Aura Break', 'Battle Armor',
+    'Big Pecks', 'Bulletproof', 'Clear Body', 'Contrary',
+    'Damp', 'Dazzling', 'Disguise', 'Dry Skin',
+    'Earth Eater', 'Filter', 'Flash Fire', 'Flower Gift',
+    'Flower Veil', 'Fluffy', 'Friend Guard', 'Fur Coat',
+    'Good as Gold', 'Grass Pelt', 'Guard Dog', 'Heatproof',
+    'Heavy Metal', 'Hyper Cutter', 'Ice Face', 'Ice Scales',
+    'Illuminate', 'Immunity', 'Inner Focus', 'Insomnia',
+    'Keen Eye', 'Leaf Guard', 'Levitate', 'Light Metal',
+    'Lightning Rod', 'Limber', 'Magic Bounce', 'Magma Armor',
+    'Marvel Scale', "Mind's Eye", 'Mirror Armor', 'Motor Drive',
+    'Multiscale', 'Oblivious', 'Overcoat', 'Own Tempo',
+    'Pastel Veil', 'Punk Rock', 'Purifying Salt', 'Queenly Majesty',
+    'Sand Veil', 'Sap Sipper', 'Shell Armor', 'Shield Dust',
+    'Simple', 'Snow Cloak', 'Solid Rock', 'Soundproof',
+    'Sticky Hold', 'Storm Drain', 'Sturdy', 'Suction Cups',
+    'Sweet Veil', 'Tangled Feet', 'Telepathy', 'Tera Shell',
+    'Thermal Exchange', 'Thick Fat', 'Unaware', 'Vital Spirit',
+    'Volt Absorb', 'Water Absorb', 'Water Bubble', 'Water Veil',
+    'Well-Baked Body', 'White Smoke', 'Wind Rider', 'Wonder Guard',
+    'Wonder Skin'
   );
 
   const attackerIgnoresAbility = attacker.hasAbility('Mold Breaker', 'Teravolt', 'Turboblaze');
@@ -171,8 +193,8 @@ export function calculateSMSSSV(
     'Searing Sunraze Smash',
     'Sunsteel Strike'
   );
-  if (!defenderIgnoresAbility && !defender.hasAbility('Poison Heal') &&
-    (attackerIgnoresAbility || moveIgnoresAbility)) {
+
+  if (defenderAbilityIgnored && (attackerIgnoresAbility || moveIgnoresAbility)) {
     if (attackerIgnoresAbility) desc.attackerAbility = attacker.ability;
     if (defender.hasItem('Ability Shield')) {
       desc.defenderItem = defender.item;
@@ -191,13 +213,21 @@ export function calculateSMSSSV(
   if (attacker.hasAbility('Neutralizing Gas') &&
     !ignoresNeutralizingGas.includes(defender.ability || '')) {
     desc.attackerAbility = attacker.ability;
-    defender.ability = '' as AbilityName;
+    if (defender.hasItem('Ability Shield')) {
+      desc.defenderItem = defender.item;
+    } else {
+      defender.ability = '' as AbilityName;
+    }
   }
 
   if (defender.hasAbility('Neutralizing Gas') &&
     !ignoresNeutralizingGas.includes(attacker.ability || '')) {
     desc.defenderAbility = defender.ability;
-    attacker.ability = '' as AbilityName;
+    if (attacker.hasItem('Ability Shield')) {
+      desc.attackerItem = attacker.item;
+    } else {
+      attacker.ability = '' as AbilityName;
+    }
   }
 
   // Merciless does not ignore Shell Armor, damage dealt to a poisoned Pokemon with Shell Armor
@@ -275,6 +305,10 @@ export function calculateSMSSSV(
     } else if (attacker.named('Tauros-Paldea-Aqua')) {
       type = 'Water';
     }
+
+    field.defenderSide.isReflect = false;
+    field.defenderSide.isLightScreen = false;
+    field.defenderSide.isAuroraVeil = false;
   } else if (move.named('Ivy Cudgel')) {
     if (attacker.name.includes('Ogerpon-Cornerstone')) {
       type = 'Rock';
@@ -288,6 +322,10 @@ export function calculateSMSSSV(
   ) {
     move.target = 'allAdjacentFoes';
     type = 'Stellar';
+  } else if (move.named('Brick Break', 'Psychic Fangs')) {
+    field.defenderSide.isReflect = false;
+    field.defenderSide.isLightScreen = false;
+    field.defenderSide.isAuroraVeil = false;
   }
 
   let hasAteAbilityTypeChange = false;
@@ -403,7 +441,8 @@ export function calculateSMSSSV(
       (move.named('Dream Eater') &&
         (!(defender.hasStatus('slp') || defender.hasAbility('Comatose')))) ||
       (move.named('Steel Roller') && !field.terrain) ||
-      (move.named('Poltergeist') && (!defender.item || isQPActive(defender, field)))
+      (move.named('Poltergeist') &&
+        (!defender.item || (isQPActive(defender, field) && defender.hasItem('Booster Energy'))))
   ) {
     return result;
   }
@@ -559,6 +598,7 @@ export function calculateSMSSSV(
           ? 'spa'
           : 'atk';
   // #endregion
+
   // #region (Special) Defense
 
   const defense = calculateDefenseSMSSSV(gen, attacker, defender, move, field, desc, isCritical);
@@ -634,22 +674,23 @@ export function calculateSMSSSV(
     desc.attackerAbility = attacker.ability;
   }
 
-  let damage = [];
+  const damage: number[] = [];
   for (let i = 0; i < 16; i++) {
     damage[i] =
       getFinalDamage(baseDamage, i, typeEffectiveness, applyBurn, stabMod, finalMod, protect);
   }
+  result.damage = childDamage ? [damage, childDamage] : damage;
 
   desc.attackBoost =
     move.named('Foul Play') ? defender.boosts[attackStat] : attacker.boosts[attackStat];
 
-  if ((move.dropsStats && move.timesUsed! > 1) || move.hits > 1) {
+  if (move.timesUsed! > 1 || move.hits > 1) {
     // store boosts so intermediate boosts don't show.
     const origDefBoost = desc.defenseBoost;
     const origAtkBoost = desc.attackBoost;
 
     let numAttacks = 1;
-    if (move.dropsStats && move.timesUsed! > 1) {
+    if (move.timesUsed! > 1) {
       desc.moveTurns = `over ${move.timesUsed} turns`;
       numAttacks = move.timesUsed!;
     } else {
@@ -657,6 +698,7 @@ export function calculateSMSSSV(
     }
     let usedItems = [false, false];
     let totalModBp = desc.moveBP;
+    const damageMatrix = [damage];
     for (let times = 1; times < numAttacks; times++) {
       usedItems = checkMultihitBoost(gen, attacker, defender, move,
         field, desc, usedItems[0], usedItems[1]);
@@ -669,7 +711,7 @@ export function calculateSMSSSV(
       hasAteAbilityTypeChange = hasAteAbilityTypeChange &&
         attacker.hasAbility('Aerilate', 'Galvanize', 'Pixilate', 'Refrigerate', 'Normalize');
 
-      if ((move.dropsStats && move.timesUsed! > 1)) {
+      if (move.timesUsed! > 1) {
         // Adaptability does not change between hits of a multihit, only between turns
         preStellarStabMod = getStabMod(attacker, move, desc);
         // Hack to make Tera Shell with multihit moves, but not over multiple turns
@@ -715,30 +757,30 @@ export function calculateSMSSSV(
       );
       const newFinalMod = chainMods(newFinalMods, 41, 131072);
 
-      let damageMultiplier = 0;
-      damage = damage.map(affectedAmount => {
+      const damageArray: number[] = [];
+      for (let i = 0; i < 16; i++) {
         const newFinalDamage = getFinalDamage(
           newBaseDamage,
-          damageMultiplier,
+          i,
           typeEffectiveness,
           applyBurn,
           stabMod,
           newFinalMod,
           protect
         );
-        damageMultiplier++;
-        return affectedAmount + newFinalDamage;
-      });
+        damageArray[i] = newFinalDamage;
+      }
+      damageMatrix[times] = damageArray;
       if (mods?.hitBasePowers?.length) {
         totalModBp += (desc.moveBP || 0);
       }
     }
+    result.damage = damageMatrix;
     desc.moveBP = totalModBp;
     desc.defenseBoost = origDefBoost;
     desc.attackBoost = origAtkBoost;
   }
 
-  result.damage = childDamage ? [damage, childDamage] : damage;
 
   // #endregion
 
@@ -822,7 +864,8 @@ export function calculateBasePowerSMSSSV(
     break;
   case 'Acrobatics':
     basePower = move.bp * (attacker.hasItem('Flying Gem') ||
-        (!attacker.item || isQPActive(attacker, field)) ? 2 : 1);
+        (!attacker.item ||
+          (isQPActive(attacker, field) && attacker.hasItem('Booster Energy'))) ? 2 : 1);
     desc.moveBP = basePower;
     break;
   case 'Assurance':
@@ -983,7 +1026,8 @@ export function calculateBasePowerSMSSSV(
     desc,
     basePower,
     hasAteAbilityTypeChange,
-    turnOrder
+    turnOrder,
+    hit
   );
   basePower = OF16(Math.max(1, pokeRound((basePower * chainMods(bpMods, 41, 2097152)) / 4096)));
   if (
@@ -1008,36 +1052,43 @@ export function calculateBPModsSMSSSV(
   desc: RawDesc,
   basePower: number,
   hasAteAbilityTypeChange: boolean,
-  turnOrder: string
+  turnOrder: string,
+  hit: number
 ) {
   const bpMods = [];
 
   // Move effects
-
+  const defenderItem = (defender.item && defender.item !== '')
+    ? defender.item : defender.disabledItem;
   let resistedKnockOffDamage =
-    (!defender.item || isQPActive(defender, field)) ||
-    (defender.named('Dialga-Origin') && defender.hasItem('Adamant Crystal')) ||
-    (defender.named('Palkia-Origin') && defender.hasItem('Lustrous Globe')) ||
+    (!defenderItem || (isQPActive(defender, field) && defenderItem === 'Booster Energy')) ||
+    (defender.named('Dialga-Origin') && defenderItem === 'Adamant Crystal') ||
+    (defender.named('Palkia-Origin') && defenderItem === 'Lustrous Globe') ||
     // Griseous Core for gen 9, Griseous Orb otherwise
-    (defender.name.includes('Giratina-Origin') && defender.item.includes('Griseous')) ||
-    (defender.name.includes('Arceus') && defender.item.includes('Plate')) ||
-    (defender.name.includes('Genesect') && defender.item.includes('Drive')) ||
-    (defender.named('Groudon', 'Groudon-Primal') && defender.hasItem('Red Orb')) ||
-    (defender.named('Kyogre', 'Kyogre-Primal') && defender.hasItem('Blue Orb')) ||
-    (defender.name.includes('Silvally') && defender.item.includes('Memory')) ||
-    defender.item.includes(' Z') ||
-    (defender.named('Zacian', 'Zacian-Crowned') && defender.hasItem('Rusted Sword')) ||
-    (defender.named('Zamazenta', 'Zamazenta-Crowned') && defender.hasItem('Rusted Shield')) ||
-    (defender.named('Ogerpon', 'Ogerpon-Cornerstone') && defender.hasItem('Cornerstone Mask')) ||
-    (defender.named('Ogerpon', 'Ogerpon-Hearthflame') && defender.hasItem('Hearthflame Mask')) ||
-    (defender.named('Ogerpon', 'Ogerpon-Wellspring') && defender.hasItem('Wellspring Mask')) ||
-    (defender.named('Venomicon-Epilogue') && defender.hasItem('Vile Vial'));
+    (defender.named('Giratina-Origin') && defenderItem.includes('Griseous')) ||
+    (defender.named('Arceus') && defenderItem.includes('Plate')) ||
+    (defender.named('Genesect') && defenderItem.includes('Drive')) ||
+    (defender.named('Groudon', 'Groudon-Primal') && defenderItem === 'Red Orb') ||
+    (defender.named('Kyogre', 'Kyogre-Primal') && defenderItem === 'Blue Orb') ||
+    (defender.named('Silvally') && defenderItem.includes('Memory')) ||
+    defenderItem.includes(' Z') ||
+    (defender.named('Zacian', 'Zacian-Crowned') && defenderItem === 'Rusted Sword') ||
+    (defender.named('Zamazenta', 'Zamazenta-Crowned') && defenderItem === 'Rusted Shield') ||
+    (defender.named('Ogerpon-Cornerstone') && defenderItem === 'Cornerstone Mask') ||
+    (defender.named('Ogerpon-Hearthflame') && defenderItem === 'Hearthflame Mask') ||
+    (defender.named('Ogerpon-Wellspring') && defenderItem === 'Wellspring Mask') ||
+    (defender.named('Venomicon-Epilogue') && defenderItem === 'Vile Vial');
 
   // The last case only applies when the Pokemon has the Mega Stone that matches its species
   // (or when it's already a Mega-Evolution)
-  if (!resistedKnockOffDamage && defender.item) {
-    const item = gen.items.get(toID(defender.item))!;
+  if (!resistedKnockOffDamage && defenderItem) {
+    const item = gen.items.get(toID(defenderItem))!;
     resistedKnockOffDamage = !!item.megaEvolves && defender.name.includes(item.megaEvolves);
+  }
+
+  // Resist knock off damage if your item was already knocked off
+  if (!resistedKnockOffDamage && hit > 1 && !defender.hasAbility('Sticky Hold')) {
+    resistedKnockOffDamage = true;
   }
 
   if ((move.named('Facade') && attacker.hasStatus('brn', 'par', 'psn', 'tox')) ||
@@ -1161,7 +1212,7 @@ export function calculateBPModsSMSSSV(
   // Sheer Force does not power up max moves or remove the effects (SadisticMystic)
   if (
     (attacker.hasAbility('Sheer Force') &&
-      (move.secondaries || move.named('Jet Punch', 'Order Up')) && !move.isMax) ||
+      (move.secondaries || move.named('Electro Shot', 'Order Up')) && !move.isMax) ||
     (attacker.hasAbility('Sand Force') &&
       field.hasWeather('Sand') && move.hasType('Rock', 'Ground', 'Steel')) ||
     (attacker.hasAbility('Analytic') &&
@@ -1205,10 +1256,6 @@ export function calculateBPModsSMSSSV(
   ) {
     bpMods.push(4915);
     desc.attackerAbility = attacker.ability;
-  }
-
-  if (attacker.hasItem('Punching Glove') && move.flags.punch) {
-    bpMods.push(4506);
   }
 
   if (gen.num <= 8 && defender.hasAbility('Heatproof') && move.hasType('Fire')) {
@@ -1261,6 +1308,8 @@ export function calculateBPModsSMSSSV(
   ) {
     bpMods.push(4505);
     desc.attackerItem = attacker.item;
+  } else if (attacker.hasItem('Punching Glove') && move.flags.punch) {
+    bpMods.push(4506);
   }
   return bpMods;
 }
@@ -1390,6 +1439,14 @@ export function calculateAtModsSMSSSV(
     desc.isFlowerGiftAttacker = true;
   }
 
+  if (
+    field.attackerSide.isSteelySpirit &&
+    move.hasType('Steel')
+  ) {
+    atMods.push(6144);
+    desc.isSteelySpiritAttacker = true;
+  }
+
   if ((defender.hasAbility('Thick Fat') && move.hasType('Fire', 'Ice')) ||
       (defender.hasAbility('Water Bubble') && move.hasType('Fire')) ||
      (defender.hasAbility('Purifying Salt') && move.hasType('Ghost'))) {
@@ -1471,18 +1528,24 @@ export function calculateDefenseSMSSSV(
   let defense: number;
   const hitsPhysical = move.overrideDefensiveStat === 'def' || move.category === 'Physical' ||
     (move.named('Shell Side Arm') && getShellSideArmCategory(attacker, defender) === 'Physical');
-  const defenseStat = move.overrideDefensiveStat || (hitsPhysical ? 'def' : 'spd');
+  // note: Showdex will always respect the user's override if specified, regardless of Wonder Room --keith
+  const defenseStat = move.overrideDefensiveStat || (
+    field.isWonderRoom
+      ? hitsPhysical ? 'spd' : 'def'
+      : hitsPhysical ? 'def' : 'spd'
+  );
+  const boosts = defender.boosts[defenseStat];
   desc.defenseEVs = getStatDescriptionText(gen, defender, defenseStat, defender.nature);
-  if (defender.boosts[defenseStat] === 0 ||
-      (isCritical && defender.boosts[defenseStat] > 0) ||
+  if (boosts === 0 ||
+      (isCritical && boosts > 0) ||
       move.ignoreDefensive) {
     defense = defender.rawStats[defenseStat];
   } else if (attacker.hasAbility('Unaware')) {
     defense = defender.rawStats[defenseStat];
     desc.attackerAbility = attacker.ability;
   } else {
-    defense = getModifiedStat(defender.rawStats[defenseStat]!, defender.boosts[defenseStat]!);
-    desc.defenseBoost = defender.boosts[defenseStat];
+    defense = getModifiedStat(defender.rawStats[defenseStat]!, boosts);
+    desc.defenseBoost = boosts;
   }
 
   // unlike all other defense modifiers, Sandstorm SpD boost gets applied directly
@@ -1513,10 +1576,10 @@ export function calculateDfModsSMSSSV(
   gen: Generation,
   attacker: Pokemon,
   defender: Pokemon,
-  move: Move,
+  _move: Move, // unused as of commit 7eceb6b on 2025/08/04
   field: Field,
   desc: RawDesc,
-  isCritical = false,
+  _isCritical = false, // unused as of commit 7eceb6b on 2025/08/04
   hitsPhysical = false
 ) {
   const dfMods = [];
@@ -1593,7 +1656,7 @@ export function calculateDfModsSMSSSV(
 }
 
 function calculateBaseDamageSMSSSV(
-  gen: Generation,
+  _gen: Generation, // unused as of commit 7eceb6b on 2025/08/04
   attacker: Pokemon,
   defender: Pokemon,
   basePower: number,
@@ -1650,7 +1713,7 @@ function calculateBaseDamageSMSSSV(
 }
 
 export function calculateFinalModsSMSSSV(
-  gen: Generation,
+  _gen: Generation, // unused as of commit 7eceb6b on 2025/08/04
   attacker: Pokemon,
   defender: Pokemon,
   move: Move,
