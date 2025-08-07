@@ -1065,18 +1065,18 @@ export function calculateBPModsSMSSSV(
     (defender.named('Dialga-Origin') && defenderItem === 'Adamant Crystal') ||
     (defender.named('Palkia-Origin') && defenderItem === 'Lustrous Globe') ||
     // Griseous Core for gen 9, Griseous Orb otherwise
-    (defender.named('Giratina-Origin') && defenderItem.includes('Griseous')) ||
-    (defender.named('Arceus') && defenderItem.includes('Plate')) ||
-    (defender.named('Genesect') && defenderItem.includes('Drive')) ||
+    (defender.name.includes('Giratina-Origin') && defenderItem.includes('Griseous')) ||
+    (defender.name.includes('Arceus') && defenderItem.includes('Plate')) ||
+    (defender.name.includes('Genesect') && defenderItem.includes('Drive')) ||
     (defender.named('Groudon', 'Groudon-Primal') && defenderItem === 'Red Orb') ||
     (defender.named('Kyogre', 'Kyogre-Primal') && defenderItem === 'Blue Orb') ||
-    (defender.named('Silvally') && defenderItem.includes('Memory')) ||
+    (defender.name.includes('Silvally') && defenderItem.includes('Memory')) ||
     defenderItem.includes(' Z') ||
-    (defender.named('Zacian', 'Zacian-Crowned') && defenderItem === 'Rusted Sword') ||
-    (defender.named('Zamazenta', 'Zamazenta-Crowned') && defenderItem === 'Rusted Shield') ||
-    (defender.named('Ogerpon-Cornerstone') && defenderItem === 'Cornerstone Mask') ||
-    (defender.named('Ogerpon-Hearthflame') && defenderItem === 'Hearthflame Mask') ||
-    (defender.named('Ogerpon-Wellspring') && defenderItem === 'Wellspring Mask') ||
+    (defender.name.includes('Zacian') && defenderItem === 'Rusted Sword') ||
+    (defender.name.includes('Zamazenta') && defenderItem === 'Rusted Shield') ||
+    (defender.name.includes('Ogerpon-Cornerstone') && defenderItem === 'Cornerstone Mask') ||
+    (defender.name.includes('Ogerpon-Hearthflame') && defenderItem === 'Hearthflame Mask') ||
+    (defender.name.includes('Ogerpon-Wellspring') && defenderItem === 'Wellspring Mask') ||
     (defender.named('Venomicon-Epilogue') && defenderItem === 'Vile Vial');
 
   // The last case only applies when the Pokemon has the Mega Stone that matches its species
