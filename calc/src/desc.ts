@@ -6,6 +6,7 @@ import {type Damage, damageRange, multiDamageRange} from './result';
 import {error} from './util';
 // NOTE: This needs to come last to simplify bundling
 import {isGrounded} from './mechanics/util';
+import { type ShowdexCalcMods } from './showdex';
 
 export interface RawDesc {
   __debug__?: unknown;
@@ -269,7 +270,8 @@ export function getKOChance(
   move: Move,
   field: Field,
   damageObj: Damage,
-  err = true
+  err = true,
+  mods?: ShowdexCalcMods,
 ) {
   const [damage, approximate] = combine(damageObj);
   if (isNaN(damage[0])) {
@@ -307,6 +309,30 @@ export function getKOChance(
       ? ' after ' + serializeText(hazards.texts.concat(eot.texts))
       : '';
   const afterTextNoHazards = eot.texts.length > 0 ? ' after ' + serializeText(eot.texts) : '';
+
+  // note to self (keith): trying to display 'before' doesn't work as intended atm lmao; nbd tho
+  /* const hazardsText = hazards.texts.length > 0
+    ? ` ${mods?.excludeHazardsDamage ? 'before' : 'after'} ` + serializeText(hazards.texts)
+    : '';
+
+  const afterTextNoHazards = eot.texts.length > 0
+    ? ` ${mods?.excludeEotDamage ? 'before' : 'after'} ` + serializeText(eot.texts)
+    : '';
+
+  const afterText = hazards.texts.length && eot.texts.length
+    ? (mods?.excludeHazardsDamage && mods.excludeEotDamage)
+      || (!mods?.excludeHazardsDamage && !mods?.excludeEotDamage)
+      ? `\x20${mods?.excludeHazardsDamage ? 'before' : 'after'} ${serializeText([...hazards.texts, ...eot.texts])}`
+      : [hazardsText, afterTextNoHazards].filter(Boolean).join(',\x20')
+    : (hazardsText || afterTextNoHazards); */
+
+  if (mods?.excludeHazardsDamage) {
+    hazards.damage = 0;
+  }
+
+  if (mods?.excludeEotDamage) {
+    eot.damage = 0;
+  }
 
   function roundChance(chance: number) {
     // prevent displaying misleading 100% or 0% chances

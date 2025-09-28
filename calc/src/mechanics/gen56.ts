@@ -79,7 +79,7 @@ export function calculateBWXY(
     isWonderRoom: field.isWonderRoom,
   };
 
-  const result = new Result(gen, attacker, defender, move, field, 0, desc);
+  const result = new Result(gen, attacker, defender, move, field, 0, desc, mods);
 
   if (move.category === 'Status' && !move.named('Nature Power', 'Pain Split')) {
     return result;

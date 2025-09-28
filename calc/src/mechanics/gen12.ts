@@ -24,7 +24,7 @@ export function calculateRBYGSC(
     defenderName: defender.name,
   };
 
-  const result = new Result(gen, attacker, defender, move, field, 0, desc);
+  const result = new Result(gen, attacker, defender, move, field, 0, desc, mods);
 
   if (move.category === 'Status' && !move.named('Pain Split')) {
     return result;

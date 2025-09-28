@@ -90,6 +90,20 @@ export interface ShowdexCalcMods {
    * @see https://github.com/smogon/damage-calc/commit/718d832eb5d5101e15587d709e7a26a3588a8edd
    */
   hitBasePowers?: number[];
+
+  /**
+   * Whether damage from stage hazards (e.g., *Stealth Rock*) should be excluded from the NHKO chance.
+   *
+   * @since 1.3.0
+   */
+  excludeHazardsDamage?: boolean;
+
+  /**
+   * Whether damage from end-of-turn effects (e.g., *Burned*, *Sandstorm*) should be excluded from the NHKO chance.
+   *
+   * @since 1.3.0
+   */
+  excludeEotDamage?: boolean;
 }
 
 /**

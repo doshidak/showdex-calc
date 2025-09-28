@@ -3,6 +3,7 @@ import type {Generation} from './data/interface';
 import type {Field} from './field';
 import type {Move} from './move';
 import type {Pokemon} from './pokemon';
+import { type ShowdexCalcMods } from './showdex';
 
 export type Damage = number | number[] | [number, number] | number[][];
 
@@ -14,6 +15,7 @@ export class Result {
   field: Field;
   damage: number | number[] | number[][];
   rawDesc: RawDesc;
+  mods?: ShowdexCalcMods;
 
   constructor(
     gen: Generation,
@@ -23,6 +25,7 @@ export class Result {
     field: Field,
     damage: Damage,
     rawDesc: RawDesc,
+    mods?: ShowdexCalcMods,
   ) {
     this.gen = gen;
     this.attacker = attacker;
@@ -31,6 +34,7 @@ export class Result {
     this.field = field;
     this.damage = damage;
     this.rawDesc = rawDesc;
+    this.mods = mods;
   }
 
   /* get */ desc() {
@@ -76,7 +80,8 @@ export class Result {
       this.move,
       this.field,
       this.damage,
-      err
+      err,
+      this.mods,
     );
   }
 }
