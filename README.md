@@ -7,9 +7,9 @@
 <table align="center">
   <thead>
     <tr>
-      <th align="center">&nbsp;Currently <a href="https://github.com/doshidak/showdex-calc/releases"><s>v1.2.6</s></a>&nbsp;</th>
-      <th align="center">&nbsp;Powering <a href="https://github.com/doshidak/showdex"><code>showdex</code></a> · <a href="https://github.com/doshidak/showdex/releases"><s>v1.2.6</s></a>&nbsp;</th>
-      <th align="center">&nbsp;Patches <a href="https://github.com/smogon/damage-calc/tree/master/calc"><code>@smogon/calc</code></a> · <a href="https://npmjs.com/package/@smogon/calc/v/0.10.0">v0.10.0</a> &rarr; <a href="https://github.com/smogon/damage-calc/commit/7eceb6b6ff9eebe8e8fb50b127813e0ca27063c6"><code>7eceb6b</code></a>&nbsp;</th>
+      <th align="center">&nbsp;Currently <a href="https://github.com/doshidak/showdex-calc/releases/tag/v1.3.0"><s>v1.3.0</s></a>&nbsp;</th>
+      <th align="center">&nbsp;Powering <a href="https://github.com/doshidak/showdex"><code>showdex</code></a> · <a href="https://github.com/doshidak/showdex/releases/tag/v1.3.0"><s>v1.3.0</s></a>&nbsp;</th>
+      <th align="center">&nbsp;Patches <a href="https://github.com/smogon/damage-calc/tree/master/calc"><code>@smogon/calc</code></a> · <a href="https://npmjs.com/package/@smogon/calc/v/0.10.0">v0.10.0</a> &rarr; <a href="https://github.com/doshidak/showdex-calc/commit/565b2275674a791fadd093eef9c710314f584950"><code>565b227</code></a>&nbsp;</th>
     </tr>
   </thead>
 </table>
@@ -45,11 +45,12 @@ Sooo... what's different?
 **More specifically:**
 
 * Hacky [*Beat Up*](https://smogon.com/dex/sv/moves/beat-up) implementation requiring [`getBaseDamage()`'s to be subbed for this fork's special `modBaseDamage()` wrapper](/calc/src/mechanics/gen3.ts#L157-L158) instead.
-  - Since this requires [knowledge about all party Pokémon](https://bulbapedia.bulbagarden.net/wiki/Beat_Up_(move)#Effect), Showdex passes a special [`ShowdexCalcMods`](/calc/src/showdex.ts#L67) object to [`modBaseDamage()`](/calc/src/showdex.ts#L106), which is a generic wrapper (to support more mods in the future, as needed) that basically only contains a `strikes[]` array for *Beat Up* & `hitBasePowers[]` for overriding the BPs of each hit for multi-hitting moves such as [*Triple Axel*](https://smogon.com/dex/sv/moves/triple-axel).
+  - Since this requires [knowledge about all party Pokémon](https://bulbapedia.bulbagarden.net/wiki/Beat_Up_(move)#Effect), Showdex passes a special [`ShowdexCalcMods`](/calc/src/showdex.ts#L67) object to [`modBaseDamage()`](/calc/src/showdex.ts#L106), which is a generic wrapper (to support more mods in the future, as needed) that basically only contains a [`strikes[]`](/calc/src/showdex.ts#L80) array for *Beat Up* & [`hitBasePowers[]`](/calc/src/showdex.ts#L92) for overriding the BPs of each hit for multi-hitting moves such as [*Triple Axel*](https://smogon.com/dex/sv/moves/triple-axel).
   - Every single mechanics file from [`gen12.ts`](/calc/src/mechanics/gen12.ts#L205) to [`gen789.ts`](/calc/src/mechanics/gen789.ts#L1672) has this modification.
 * [Disabled auto-BP calculations for some moves like *Triple Kick*](/calc/src/mechanics/gen789.ts#L982-L985) (but not all!) so that what you see (in the Calcdex &mdash; especially when editing moves) is what you *calc*... sorta:
-  - As of [Showdex v1.2.5](https://github.com/doshidak/showdex/releases/tag/v1.2.5), many of the previously disabled moves, such as *Acrobatics* (but not *Triple Kick* — still disabled!), have been [re-enabled in some of the mechanics files](/calc/src/mechanics/gen789.ts#L865-L870).
-  - Showdex will display an "AUTO" label in these instances where the mechanics files will be calculating dynamic move properties, i.e., [category](/calc/src/mechanics/gen789.ts#L123-L126) &/or [BP](/calc/src/mechanics/gen789.ts#L997-L1000), for moves such as [*Tera Blast*](https://smogon.com/dex/sv/moves/tera-blast).
+  - As of [Showdex v1.2.5](https://github.com/doshidak/showdex/releases/tag/v1.2.5), many of the previously disabled moves, such as [*Acrobatics*](https://smogon.com/dex/sv/moves/acrobatics) (but not [*Triple Kick*](https://smogon.com/dex/sv/moves/triple-kick) — still disabled!), have been [re-enabled in some of the mechanics files](/calc/src/mechanics/gen789.ts#L865-L870).
+  - Showdex will display an "**AUTO**" label in these instances where the mechanics files will be calculating dynamic move properties, i.e., [category](/calc/src/mechanics/gen789.ts#L123-L126) &/or [BP](/calc/src/mechanics/gen789.ts#L997-L1000), for moves such as [*Tera Blast*](https://smogon.com/dex/sv/moves/tera-blast).
+* [Excludable damages in the NHKO calculations](/calc/src/desc.ts#L329-L335) as of [Showdex v1.3.0](https://github.com/doshidak/showdex/releases/tag/v1.3.0), namely [`mods.excludeHazardsDamage`](/calc/src/showdex.ts#L99) from field hazards such as [*Stealth Rock*](https://smogon.com/dex/sv/moves/stealth-rock) & [`mods.excludeEotDamage`](/calc/src/showdex.ts#L106) from end-of-turn effects such as the non-volatile [BRN](https://bulbapedia.bulbagarden.net/wiki/Burn_(status_condition)) status condition.
 * [Disabled auto-boosting of some abilities like *Intrepid Sword*](/calc/src/mechanics/util.ts#L257-L264), especially since Showdown *also* reports those boosts in the battle!
 * [Persistent final move BPs in matchup descriptions](/calc/src/mechanics/gen789.ts#L1042) to assist with debugging calculations from Showdex.
 * [Extra exported types in `src/index.ts`](/calc/src/index.ts#L147-L170) that I frequently use like `GameType` & `GenerationNum`, conveniently importable from `'@smogon/calc'` directly.
