@@ -273,7 +273,7 @@ var SETDEX_ADV = {
   "Swampert": {
     "OU Standard Defensive": {"ability":"Torrent","item":"Leftovers","nature":"Relaxed","evs":{"hp":248,"df":216,"sd":44},"moves":["Earthquake","Ice Beam","Protect","Hydro Pump"]},
     "OU Surf Defensive": {"ability":"Torrent","item":"Leftovers","nature":"Bold","evs":{"hp":248,"df":204,"sd":44,"sp":12},"moves":["Surf","Toxic","Protect","Refresh"]},
-    "OU Standard Offensive": {"ability":"Torrent","item":"Leftovers","nature":"Rash","evs":{"df":108,"sa":252,"sp":148},"moves":["Hydro Pump","Earthquake","Ice Beam","Focus Punch"]},
+    "OU Standard Offensive": {"ability":"Torrent","item":"Leftovers","nature":"Quiet","evs":{"hp":248,"sa":216,"sp":44},"moves":["Hydro Pump","Earthquake","Ice Beam","Focus Punch"]},
     "OU Substitute + Salac Berry": {"ability":"Torrent","item":"Salac Berry","nature":"Timid","evs":{"df":4,"sa":252,"sp":252},"moves":["Substitute","Endeavor","Hydro Pump","Roar"]},
     "Doubles OU Mixed Attacker": {"ability":"Torrent","item":"Leftovers","nature":"Quiet","evs":{"hp":252,"at":84,"sa":128,"sd":44},"moves":["Earthquake","Ice Beam","Hydro Pump","Protect"]}
   },
@@ -862,7 +862,7 @@ var SETDEX_ADV = {
     "OU Acid Armor + Baton Pass": {"ability":"Water Absorb","item":"Leftovers","nature":"Bold","evs":{"hp":252,"df":228,"sd":28},"moves":["Acid Armor","Baton Pass","Roar","Substitute"]}
   },
   "Jolteon": {
-    "OU Standard": {"ability":"Volt Absorb","item":"Leftovers","nature":"Timid","ivs":{"at":30,"df":30},"evs":{"hp":76,"sa":180,"sp":252},"moves":["Thunderbolt","Hidden Power Ice","Baton Pass","Roar"]}
+    "OU Standard": {"ability":"Volt Absorb","item":"Leftovers","nature":"Timid","ivs":{"at":30,"df":30},"evs":{"hp":4,"sa":252,"sp":252},"moves":["Thunderbolt","Hidden Power Ice","Baton Pass","Roar"]}
   },
   "Flareon": {
     "RU Mixed Offensive": {"ability":"Flash Fire","item":"Silk Scarf","nature":"Hasty","ivs":{"at":30,"sa":30},"evs":{"at":152,"sa":144,"sp":212},"moves":["Fire Blast","Double-Edge","Hidden Power Grass","Quick Attack"]},
@@ -1215,7 +1215,6 @@ var SETDEX_ADV = {
     "OU Spore": {"ability":"Effect Spore","item":"Leftovers","nature":"Jolly","evs":{"at":252,"df":4,"sp":252},"moves":["Spore","Focus Punch","Sky Uppercut","Mach Punch"]}
   },
   "Vigoroth": {
-    "RU Bulk Up": {"ability":"Vital Spirit","item":"Leftovers","nature":"Careful","evs":{"hp":252,"sd":220,"sp":36},"moves":["Bulk Up","Return","Earthquake","Slack Off"]},
     "NU Bulk Up": {"ability":"Vital Spirit","item":"Leftovers","nature":"Careful","evs":{"hp":252,"df":4,"sd":252},"moves":["Return","Earthquake","Slack Off","Bulk Up"]},
     "NU Flail + Reversal": {"ability":"Vital Spirit","item":"Salac Berry","nature":"Adamant","evs":{"at":252,"sd":4,"sp":252},"moves":["Endure","Flail","Reversal","Shadow Ball"]},
     "NU Choice Band": {"ability":"Vital Spirit","item":"Choice Band","nature":"Adamant","evs":{"at":252,"df":4,"sp":252},"moves":["Return","Earthquake","Shadow Ball","Focus Punch"]},
@@ -1249,6 +1248,9 @@ var SETDEX_ADV = {
   "Nosepass": {
     "NU Trapper": {"ability":"Magnet Pull","item":"Leftovers","nature":"Timid","evs":{"df":4,"sa":252,"sp":252},"moves":["Taunt","Fire Punch","Block","Explosion"]},
     "ZU Wall": {"ability":"Magnet Pull","item":"Leftovers","nature":"Careful","evs":{"hp":252,"at":60,"sd":196},"moves":["Earthquake","Protect","Explosion","Thunder Wave"]}
+  },
+  "Skitty": {
+    "Ubers ADORABLE DESTROYER OF WORLDS": {"ability":"Cute Charm","item":"Oran Berry","nature":"Hasty","evs":{"hp":1},"moves":["Double Slap","Tackle","Sing","Attract"]}
   },
   "Sableye": {
     "RU Wall": {"ability":"Keen Eye","item":"Leftovers","nature":"Impish","evs":{"hp":252,"df":252,"sd":4},"moves":["Seismic Toss","Toxic","Knock Off","Recover"]},
@@ -1444,11 +1446,10 @@ var SETDEX_ADV = {
   },
   "Glalie": {
     "UU Spikes": {"ability":"Inner Focus","item":"Leftovers","nature":"Jolly","ivs":{"at":30,"sa":30},"evs":{"hp":252,"at":4,"sp":252},"moves":["Spikes","Explosion","Earthquake","Hidden Power Grass"]},
-    "RU Bulky Spikes": {"ability":"Inner Focus","item":"Leftovers","nature":"Careful","evs":{"hp":252,"sd":80,"sp":176},"moves":["Spikes","Explosion","Toxic","Shadow Ball"]},
-    "RU Fast Spikes": {"ability":"Inner Focus","item":"Leftovers","nature":"Jolly","evs":{"hp":252,"sd":4,"sp":252},"moves":["Spikes","Explosion","Taunt","Earthquake"]},
     "NU Bulky Spikes": {"ability":"Inner Focus","item":"Leftovers","nature":"Naive","evs":{"hp":252,"at":4,"sp":252},"moves":["Spikes","Taunt","Ice Beam","Explosion"]},
     "NU Physical Spikes": {"ability":"Inner Focus","item":"Leftovers","nature":"Jolly","evs":{"at":252,"df":4,"sp":252},"moves":["Spikes","Earthquake","Shadow Ball","Explosion"]},
-    "OU Showdown Usage": {"ability":"Inner Focus","item":"Leftovers","nature":"Calm","evs":{"hp":252,"sd":232,"sp":24},"moves":["Spikes","Explosion","Taunt","Ice Beam"]}
+    "OU Showdown Usage": {"ability":"Inner Focus","item":"Salac Berry","nature":"Timid","evs":{"hp":252,"df":56,"sd":92,"sp":108},"moves":["Spikes","Explosion","Ice Beam","Taunt"]},
+    "RU Showdown Usage": {"ability":"Inner Focus","item":"Leftovers","nature":"Jolly","evs":{"hp":252,"sd":4,"sp":252},"moves":["Spikes","Explosion","Taunt","Ice Beam"]}
   },
   "Sealeo": {
     "PU Tank": {"ability":"Thick Fat","item":"Leftovers","nature":"Timid","ivs":{"at":2,"sa":30},"evs":{"sa":236,"sd":48,"sp":224},"moves":["Surf","Ice Beam","Hidden Power Grass","Substitute"]}

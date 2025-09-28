@@ -180,7 +180,9 @@ var SETDEX_DPP = {
     "OU SubRoost": {"ability":"Pressure","item":"Leftovers","nature":"Timid","ivs":{"at":30,"df":30},"evs":{"hp":192,"df":64,"sp":252},"moves":["Substitute","Roost","Thunderbolt","Hidden Power Ice"]},
     "OU Choice Specs": {"ability":"Pressure","item":"Choice Specs","nature":"Modest","ivs":{"hp":30,"at":30,"df":30,"sa":30,"sd":30},"evs":{"hp":4,"sa":252,"sp":252},"moves":["Thunderbolt","Hidden Power Flying","Heat Wave","U-turn"]},
     "OU Specially Defensive": {"ability":"Pressure","item":"Leftovers","nature":"Calm","ivs":{"at":30,"df":30},"evs":{"hp":248,"sd":228,"sp":32},"moves":["Thunderbolt","Hidden Power Ice","Heat Wave","Roost"]},
-    "OU Agility": {"ability":"Pressure","item":"Leftovers","nature":"Modest","ivs":{"at":30,"df":30},"evs":{"hp":112,"sa":252,"sp":144},"moves":["Agility","Thunderbolt","Hidden Power Ice","Roost"]}
+    "OU Agility": {"ability":"Pressure","item":"Leftovers","nature":"Modest","ivs":{"at":30,"df":30},"evs":{"hp":112,"sa":252,"sp":144},"moves":["Agility","Thunderbolt","Hidden Power Ice","Roost"]},
+    "Doubles OU Bulky Special Attacker": {"ability":"Pressure","item":"Sitrus Berry","nature":"Modest","ivs":{"at":30,"df":30},"evs":{"hp":248,"sa":128,"sd":24,"sp":108},"moves":["Thunderbolt","Hidden Power Ice","Heat Wave","Protect"]},
+    "Doubles OU Choice Scarf": {"ability":"Pressure","item":"Choice Scarf","nature":"Modest","ivs":{"at":2,"df":30},"evs":{"sa":252,"sd":4,"sp":252},"moves":["Thunderbolt","Heat Wave","Hidden Power Ice","U-turn"]}
   },
   "Moltres": {
     "OU SubRoost": {"ability":"Pressure","item":"Leftovers","nature":"Bold","evs":{"hp":248,"df":200,"sp":60},"moves":["Substitute","Roost","Flamethrower","Toxic"]},
@@ -1800,8 +1802,8 @@ var SETDEX_DPP = {
   "Wailord": {
     "UU Choice Scarf": {"ability":"Water Veil","item":"Choice Scarf","nature":"Naive","evs":{"at":28,"sa":252,"sp":228},"moves":["Water Spout","Hydro Pump","Ice Beam","Self-Destruct"]},
     "UU Choice Specs": {"ability":"Water Veil","item":"Choice Specs","nature":"Quiet","ivs":{"df":30,"sa":30,"sp":3},"evs":{"df":128,"sa":252,"sd":128},"moves":["Water Spout","Hidden Power Grass","Ice Beam","Surf"]},
-    "ZU Offensive": {"ability":"Water Veil","item":"Leftovers","nature":"Timid","ivs":{"at":30,"sa":30},"evs":{"hp":252,"sd":4,"sp":252},"moves":["Surf","Ice Beam","Hidden Power Grass","Substitute"]},
-    "ZU SubToxic": {"ability":"Water Veil","item":"Leftovers","nature":"Timid","ivs":{"at":0},"evs":{"hp":252,"sd":4,"sp":252},"moves":["Substitute","Surf","Toxic","Protect"]},
+    "ZU Offensive": {"ability":"Water Veil","item":"Leftovers","nature":"Timid","ivs":{"at":30,"sa":30},"evs":{"sa":252,"sd":4,"sp":252},"moves":["Surf","Ice Beam","Hidden Power Grass","Substitute"]},
+    "ZU SubToxic": {"ability":"Water Veil","item":"Leftovers","nature":"Timid","ivs":{"at":0},"evs":{"sa":252,"sd":4,"sp":252},"moves":["Substitute","Surf","Toxic","Ice Beam"]},
     "ZU Choice Item": {"ability":"Water Veil","item":"Choice Scarf","nature":"Timid","ivs":{"at":30,"sa":30},"evs":{"at":4,"sa":252,"sp":252},"moves":["Water Spout","Surf","Ice Beam","Hidden Power Grass"]}
   },
   "Numel": {
@@ -2141,6 +2143,7 @@ var SETDEX_DPP = {
     "ZU All-out Attacker": {"ability":"Intimidate","item":"Life Orb","nature":"Naive","ivs":{"at":30,"df":30},"evs":{"at":4,"sa":252,"sp":252},"moves":["Thunderbolt","Superpower","Hidden Power Ice","Quick Attack"]},
     "ZU Defensive": {"ability":"Intimidate","item":"Leftovers","nature":"Bold","evs":{"hp":252,"df":240,"sp":16},"moves":["Toxic","Thunderbolt","Rest","Sleep Talk"]},
     "ZU Fast Utility": {"ability":"Intimidate","item":"Leftovers","nature":"Timid","ivs":{"at":2,"df":30},"evs":{"hp":252,"df":4,"sp":252},"moves":["Toxic","Thunderbolt","Hidden Power Ice","Protect"]},
+    "ZU Choice Band": {"ability":"Intimidate","item":"Choice Band","nature":"Adamant","evs":{"at":252,"df":4,"sp":252},"moves":["Superpower","Spark","Ice Fang","Quick Attack"]},
     "PU Showdown Usage": {"ability":"Intimidate","item":"Leftovers","nature":"Relaxed","ivs":{"at":30,"sa":30},"evs":{"hp":252,"df":252,"sd":4},"moves":["Hidden Power Grass","Roar","Rest","Spark"]}
   },
   "Budew": {

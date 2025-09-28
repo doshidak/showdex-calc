@@ -158,7 +158,7 @@ function getStats(currentPoke, rows, offset) {
 		}
 
 		currentNature = rows[x] ? rows[x].trim().split(" ") : '';
-		if (currentNature[1] == "Nature") {
+		if (currentNature[1] == "Nature" && currentNature[0] != "-") {
 			currentPoke.nature = currentNature[0];
 		}
 	}
@@ -181,7 +181,7 @@ function getMoves(currentPoke, rows, offset) {
 		if (rows[x]) {
 			if (rows[x][0] == "-") {
 				movesFound = true;
-				var move = rows[x].substr(2, rows[x].length - 2).replace("[", "").replace("]", "").replace("  ", "");
+				var move = rows[x].slice(2).replace("[", "").replace("]", "").trim().replace(/\s+/g, " ");
 				moves.push(move);
 			} else {
 				if (movesFound == true) {

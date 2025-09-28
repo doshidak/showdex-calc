@@ -1180,6 +1180,22 @@ describe('calc', () => {
         expect(result.range()).toEqual([38, 46]);
         expect(result.recovery().recovery).toEqual([24, 29]);
       });
+      test('Big Root applies to OHKO', () => {
+        const bigRoot = Pokemon('Blissey', {item: 'Big Root'});
+        // 100 HP
+        const weak = Pokemon('Abomasnow', {
+          item: 'Icy Rock',
+          ability: 'Snow Warning',
+          nature: 'Hasty',
+          evs: {atk: 252, spd: 4, spe: 252},
+          level: 29,
+        });
+        // Guaranteed OHKO
+        const result = calculate(bigRoot, weak, Move('Drain Punch'));
+        expect(result.range()).toEqual([120, 142]);
+        // 100 damage * (50% heal * ~1.3 big root boost = ~64.99% heal) truncates to 64 HP recovered
+        expect(result.recovery().recovery).toEqual([64, 64]);
+      });
       test('Loaded Field', () => {
         const field = Field({
           gameType: 'Doubles',
@@ -1545,7 +1561,38 @@ describe('calc', () => {
         expect(attacker.boosts.atk).toBe(0);
         expect(result.attacker.boosts.atk).toBe(1);
       });
+      describe('Terastallization', () => {
+        describe('Terastallization Base Power boost', () => {
+          const pokemon = Pokemon('Arceus', {teraType: 'Normal'});
+          test('Moves under 40 Base Power should be boosted to 60 Base Power', () => {
+            expect(calculate(pokemon, pokemon, Move('Scratch')).rawDesc.moveBP).toBe(60);
+          });
+          test('Multihit moves don\'t get their Base Power boosted', () => {
+            expect(calculate(pokemon, pokemon, Move('Spike Cannon')).rawDesc.moveBP).toBeUndefined();
+          });
+          test('Priority moves don\'t get their Base Power boosted', () => {
+            expect(calculate(pokemon, pokemon, Move('Quick Attack')).rawDesc.moveBP).toBeUndefined();
+          });
+        });
+        test('Pokemon with moves affected by Triage should still have their BP boosted', () => {
+          const pokemon = Pokemon('Comfey', {ability: 'Triage', teraType: 'Fairy'});
+          expect(calculate(pokemon, pokemon, Move('Draining Kiss')).rawDesc.moveBP).toBe(60);
 
+          pokemon.teraType = 'Grass';
+          expect(calculate(pokemon, pokemon, Move('Absorb')).rawDesc.moveBP).toBe(60);
+
+          pokemon.teraType = 'Stellar';
+          expect(calculate(pokemon, pokemon, Move('Draining Kiss', {isStellarFirstUse: true})).rawDesc.moveBP).toBe(60);
+          expect(calculate(pokemon, pokemon, Move('Absorb', {isStellarFirstUse: true})).rawDesc.moveBP).toBe(60);
+        });
+        test('Pokemon with moves affected by Gale Wings should still have their BP boosted', () => {
+          const pokemon = Pokemon('Talonflame', {ability: 'Gale Wings', teraType: 'Flying'});
+          expect(calculate(pokemon, pokemon, Move('Peck')).rawDesc.moveBP).toBe(60);
+
+          pokemon.teraType = 'Stellar';
+          expect(calculate(pokemon, pokemon, Move('Peck', {isStellarFirstUse: true})).rawDesc.moveBP).toBe(60);
+        });
+      });
       describe('Tera Stellar', () => {
         const terastal = Pokemon('Arceus', {teraType: 'Stellar'});
         const control = Pokemon('Arceus');
@@ -1576,6 +1623,22 @@ describe('calc', () => {
               .rawDesc
               .isStellarFirstUse);
           expect(result[0]).not.toEqual(result[1]);
+        });
+        test('should boost the Base Power of moves under 60 Base Power if it\'s the first use of the move', () => {
+          expect(calculate(terastal, control, Move('Water Gun', {isStellarFirstUse: true})).rawDesc.moveBP).toBe(60);
+          expect(calculate(terastal, control, Move('Water Gun', {isStellarFirstUse: false})).rawDesc.moveBP).toBeUndefined();
+          expect(calculate(terastal, control, Move('Scratch', {isStellarFirstUse: true})).rawDesc.moveBP).toBe(60);
+          expect(calculate(terastal, control, Move('Scratch', {isStellarFirstUse: false})).rawDesc.moveBP).toBeUndefined();
+        });
+        describe('should boost the base Power of moves weakened in Terrain', () => {
+          test('Dragon-type moves in Misty Terrain', () => {
+            const pokemon = Pokemon('Dracovish', {teraType: 'Stellar'});
+            expect(calculate(pokemon, pokemon, Move('Dragon Rush', {isStellarFirstUse: true}), Field({terrain: 'Misty'})).rawDesc.moveBP).toBe(60);
+          });
+          test('Earthquake in Grassy Terrain', () => {
+            const pokemon = Pokemon('Dracovish', {teraType: 'Stellar'});
+            expect(calculate(pokemon, pokemon, Move('Earthquake', {isStellarFirstUse: true}), Field({terrain: 'Grassy'})).rawDesc.moveBP).toBe(60);
+          });
         });
       });
     });
