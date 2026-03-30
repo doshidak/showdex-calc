@@ -66,7 +66,7 @@ Many of these modifications were made to account for real-time battle conditions
 ## ①&nbsp;&nbsp;Installation
 
 > [!CAUTION]
-> Without any additional package configuration (that I'm too lazy to do rn), attempting to install this from a package manager (e.g., `yarn add doshidak/showdex-calc`) will fail! You **must** install this custom fork into your local copy of Showdex using the cumbersome method detailed below. Sorry :c
+> Without any additional package configuration (that I'm too lazy to do rn), attempting to install this from a package manager (e.g., `pnpm add doshidak/showdex-calc`) will fail! You **must** install this custom fork into your local copy of Showdex using the cumbersome method detailed below. Sorry :c
 
 > [!IMPORTANT]
 > I'm assuming you've already cloned `doshidak/showdex.git` (i.e., Showdex's source code), which exists under `showdex` in your favorite directory.
