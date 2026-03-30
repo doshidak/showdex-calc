@@ -121,7 +121,7 @@
                         </div>
                         <div class="hide">
                             <label>Gender</label>
-                            <select class="gender calc-trigger"><option></option><option selected="selected">Male</option><option>Female</option></select>
+                            <select class="gender calc-trigger"><option value="">(Select)</option><option value="M">Male</option><option value="F">Female</option><option value="N">Genderless</option></select>
                         </div>
                         <div>
                             <label>Level</label>
@@ -800,7 +800,7 @@
                             <label class="btn btn-wide" for="leechSeedR">Leech Seed</label>
                         </div>
                     </div>
-                    <div class="btn-group">
+                    <div class="btn-group gen-specific g9">
                         <div class="left" title="Has this Pok&eacute;mon been affected by Salt Cure?">
                             <input class="visually-hidden" type="checkbox" id="saltCureL" />
                             <label class="btn btn-wide" for="saltCureL">Salt Cure</label>
@@ -850,6 +850,17 @@
                             <input aria-describedby="selectFlowerGiftInstruction" class="visually-hidden calc-trigger" type="checkbox" id="flowerGiftR" />
                             <label class="btn btn-xxwide" for="flowerGiftR">Flower Gift</label>
                         </div></td>
+                    </tr>
+                    <tr class="gen-specific g4 g5 g6 g7 g8 g9">
+                            <td><div class="left" title="Is the Pok&eacute;mon affected by Power Trick?">
+                                <div hidden id="selectPowerTrickInstruction">Is the Pok&eacute;mon affected by Power Trick?</div>
+                                <input aria-describedby="selectPowerTrickInstruction" class="visually-hidden calc-trigger" type="checkbox" id="powerTrickL" />
+                                <label class="btn btn-xxwide" for="powerTrickL">Power Trick</label>
+                            </div></td>
+                            <td><div class="right" title="Is the Pok&eacute;mon affected by Power Trick?">
+                                <input aria-describedby="selectPowerTrickInstruction" class="visually-hidden calc-trigger" type="checkbox" id="powerTrickR" />
+                                <label class="btn btn-xxwide" for="powerTrickR">Power Trick</label>
+                            </div></td>
                     </tr>
                     <div class="btn-group gen-specific g5 g6 g7 g8 g9">
                         <div class="left" title="Is the Pok&eacute;mon protected by an ally's Friend Guard?">

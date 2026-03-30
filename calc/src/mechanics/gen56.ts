@@ -23,7 +23,7 @@ import {
   checkItem,
   checkMultihitBoost,
   checkSeedBoost,
-  checkWonderRoom,
+  checkRawStatChanges,
   computeFinalStats,
   countBoosts,
   // getBaseDamage,
@@ -55,8 +55,8 @@ export function calculateBWXY(
   checkForecast(defender, field.weather);
   checkItem(attacker, field.isMagicRoom);
   checkItem(defender, field.isMagicRoom);
-  checkWonderRoom(attacker, field.isWonderRoom);
-  checkWonderRoom(defender, field.isWonderRoom);
+  checkRawStatChanges(attacker, field.attackerSide.isPowerTrick, field.isWonderRoom);
+  checkRawStatChanges(defender, field.defenderSide.isPowerTrick, field.isWonderRoom);
   checkSeedBoost(attacker, field);
   checkSeedBoost(defender, field);
 
@@ -545,7 +545,7 @@ export function calculateBasePowerBWXY(
     desc.moveBP = basePower;
     break;
   case 'Fling':
-    basePower = getFlingPower(attacker.item);
+    basePower = getFlingPower(attacker.item, gen.num);
     desc.moveBP = basePower;
     desc.attackerItem = attacker.item;
     break;
@@ -655,7 +655,8 @@ export function calculateBPModsBWXY(
   // (or when it's already a Mega-Evolution)
   if (!resistedKnockOffDamage && defenderItem) {
     const item = gen.items.get(toID(defenderItem))!;
-    resistedKnockOffDamage = !!(item.megaEvolves && defender.name.includes(item.megaEvolves));
+    resistedKnockOffDamage = !!(item.megaStone &&
+      (item.megaStone[defender.name] || Object.values(item.megaStone).includes(defender.name)));
   }
 
   // Resist knock off damage if your item was already knocked off
@@ -833,9 +834,11 @@ export function calculateAttackBWXY(
   const attackStat = move.overrideOffensiveStat || (move.category === 'Special' ? 'spa' : 'atk');
   desc.attackEVs =
     move.named('Foul Play')
-      ? getStatDescriptionText(gen, defender, attackStat, defender.nature)
-      : getStatDescriptionText(gen, attacker, attackStat, attacker.nature);
-
+      ? getStatDescriptionText(gen, defender, attackStat, field.defenderSide.isPowerTrick)
+      : getStatDescriptionText(gen, attacker, attackStat, field.attackerSide.isPowerTrick);
+  if (field.attackerSide.isPowerTrick && move.category === 'Physical' && !move.named('Foul Play')) {
+    desc.isPowerTrickAttacker = true;
+  }
   if (attackSource.boosts[attackStat] === 0 ||
       (isCritical && attackSource.boosts[attackStat] < 0)) {
     attack = attackSource.rawStats[attackStat];
@@ -952,12 +955,16 @@ export function calculateDefenseBWXY(
   let defense: number;
   const defenseStat = move.overrideDefensiveStat || (move.category === 'Physical' ? 'def' : 'spd');
   const hitsPhysical = defenseStat === 'def';
-  const boosts = defender.boosts[
-    field.isWonderRoom ? defenseStat === 'spd' ? 'def' : 'spd' : defenseStat
-  ];
-  desc.defenseEVs = getStatDescriptionText(gen, defender, defenseStat, defender.nature);
-  if (boosts === 0 ||
-    (isCritical && boosts > 0) ||
+
+  desc.defenseEVs = getStatDescriptionText(
+    gen, defender, defenseStat, field.defenderSide.isPowerTrick, field.isWonderRoom
+  );
+  if (field.defenderSide.isPowerTrick && (field.isWonderRoom !== hitsPhysical)) {
+    desc.isPowerTrickDefender = true;
+  }
+
+  const boosts = defender.boosts[defenseStat];
+  if (boosts === 0 || (isCritical && boosts > 0) ||
     move.ignoreDefensive) {
     defense = defender.rawStats[defenseStat];
   } else if (attacker.hasAbility('Unaware')) {

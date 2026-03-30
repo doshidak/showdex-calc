@@ -30,7 +30,7 @@ import {
   checkSeedBoost,
   checkTeraformZero,
   checkWindRider,
-  checkWonderRoom,
+  checkRawStatChanges,
   computeFinalStats,
   countBoosts,
   // getBaseDamage,
@@ -68,8 +68,8 @@ export function calculateSMSSSV(
   checkForecast(defender, field.weather);
   checkItem(attacker, field.isMagicRoom);
   checkItem(defender, field.isMagicRoom);
-  checkWonderRoom(attacker, field.isWonderRoom);
-  checkWonderRoom(defender, field.isWonderRoom);
+  checkRawStatChanges(attacker, field.attackerSide.isPowerTrick, field.isWonderRoom);
+  checkRawStatChanges(defender, field.defenderSide.isPowerTrick, field.isWonderRoom);
   checkSeedBoost(attacker, field);
   checkSeedBoost(defender, field);
   checkDauntlessShield(attacker, gen);
@@ -138,7 +138,8 @@ export function calculateSMSSSV(
   }
 
   if (move.named('Shell Side Arm') &&
-    getShellSideArmCategory(attacker, defender) === 'Physical') {
+    getShellSideArmCategory(attacker, defender, field.isWonderRoom) === 'Physical') {
+    move.category = 'Physical';
     move.flags.contact = 1;
   }
 
@@ -399,6 +400,7 @@ export function calculateSMSSSV(
       isRingTarget
     )
     : 1;
+
   let typeEffectiveness = type1Effectiveness * type2Effectiveness;
 
   if (defender.teraType && defender.teraType !== 'Stellar') {
@@ -579,22 +581,12 @@ export function calculateSMSSSV(
   // #endregion
   // #region (Special) Attack
   const attack = calculateAttackSMSSSV(gen, attacker, defender, move, field, desc, isCritical);
-  const attackStat =
-    move.named('Shell Side Arm') &&
-    getShellSideArmCategory(attacker, defender) === 'Physical'
-      ? 'atk'
-      : move.named('Body Press')
-        ? 'def'
-        : move.category === 'Special'
-          ? 'spa'
-          : 'atk';
   // #endregion
 
   // #region (Special) Defense
 
   const defense = calculateDefenseSMSSSV(gen, attacker, defender, move, field, desc, isCritical);
-  const hitsPhysical = move.overrideDefensiveStat === 'def' || move.category === 'Physical' ||
-    (move.named('Shell Side Arm') && getShellSideArmCategory(attacker, defender) === 'Physical');
+  const hitsPhysical = move.overrideDefensiveStat === 'def' || move.category === 'Physical';
   const defenseStat = hitsPhysical ? 'def' : 'spd';
 
   // #endregion
@@ -680,9 +672,6 @@ export function calculateSMSSSV(
       getFinalDamage(baseDamage, i, typeEffectiveness, applyBurn, stabMod, finalMod, protect);
   }
   result.damage = childDamage ? [damage, childDamage] : damage;
-
-  desc.attackBoost =
-    move.named('Foul Play') ? defender.boosts[attackStat] : attacker.boosts[attackStat];
 
   if (move.timesUsed! > 1 || move.hits > 1) {
     // store boosts so intermediate boosts don't show.
@@ -903,7 +892,7 @@ export function calculateBasePowerSMSSSV(
     }
     break;
   case 'Fling':
-    basePower = getFlingPower(attacker.item);
+    basePower = getFlingPower(attacker.item, gen.num);
     desc.moveBP = basePower;
     desc.attackerItem = attacker.item;
     break;
@@ -1086,7 +1075,8 @@ export function calculateBPModsSMSSSV(
   // (or when it's already a Mega-Evolution)
   if (!resistedKnockOffDamage && defenderItem) {
     const item = gen.items.get(toID(defenderItem))!;
-    resistedKnockOffDamage = !!item.megaEvolves && defender.name.includes(item.megaEvolves);
+    resistedKnockOffDamage = !!(item.megaStone &&
+      (item.megaStone[defender.name] || Object.values(item.megaStone).includes(defender.name)));
   }
 
   // Resist knock off damage if your item was already knocked off
@@ -1327,30 +1317,35 @@ export function calculateAttackSMSSSV(
   isCritical = false
 ) {
   let attack: number;
+  const attackSource = move.named('Foul Play') ? defender : attacker;
+  // Body Press in Wonder Room uses normal Def, which checkRawStatChanges has moved to SpD
   const attackStat = move.overrideOffensiveStat || (
-    move.named('Shell Side Arm') &&
-    getShellSideArmCategory(attacker, defender) === 'Physical'
-      ? 'atk'
-      : move.named('Body Press')
-        ? 'def'
-        : move.category === 'Special'
-          ? 'spa'
-          : 'atk'
+    move.named('Body Press')
+      ? (field.isWonderRoom ? 'spd' : 'def')
+      : (move.category === 'Special' ? 'spa' : 'atk')
   );
   desc.attackEVs =
     move.named('Foul Play')
-      ? getStatDescriptionText(gen, defender, attackStat, defender.nature)
-      : getStatDescriptionText(gen, attacker, attackStat, attacker.nature);
-  const attackSource = move.named('Foul Play') ? defender : attacker;
-  if (attackSource.boosts[attackStat] === 0 ||
-      (isCritical && attackSource.boosts[attackStat] < 0)) {
+      ? getStatDescriptionText(
+        gen, attackSource, attackStat, field.defenderSide.isPowerTrick
+      )
+      : getStatDescriptionText(
+        gen, attackSource, attackStat, field.attackerSide.isPowerTrick, field.isWonderRoom
+      );
+  if (field.attackerSide.isPowerTrick) {
+    if ((move.category === 'Physical' && !move.named('Foul Play')) || move.named('Body Press')) {
+      desc.isPowerTrickAttacker = true;
+    }
+  }
+  const boosts = attackSource.boosts[attackStat];
+  if (boosts === 0 || (isCritical && boosts < 0)) {
     attack = attackSource.rawStats[attackStat];
   } else if (defender.hasAbility('Unaware')) {
     attack = attackSource.rawStats[attackStat];
     desc.defenderAbility = defender.ability;
   } else {
-    attack = getModifiedStat(attackSource.rawStats[attackStat]!, attackSource.boosts[attackStat]!);
-    desc.attackBoost = attackSource.boosts[attackStat];
+    attack = getModifiedStat(attackSource.rawStats[attackStat]!, boosts);
+    desc.attackBoost = boosts;
   }
 
   // unlike all other attack modifiers, Hustle gets applied directly
@@ -1529,21 +1524,22 @@ export function calculateDefenseSMSSSV(
   isCritical = false
 ) {
   let defense: number;
-  const hitsPhysical = move.overrideDefensiveStat === 'def' || move.category === 'Physical' ||
-    (move.named('Shell Side Arm') && getShellSideArmCategory(attacker, defender) === 'Physical');
+  const hitsPhysical = move.overrideDefensiveStat === 'def' || move.category === 'Physical';
   // note: Showdex will always respect the user's override if specified, regardless of Wonder Room --keith
-  const defenseStat = move.overrideDefensiveStat || (
-    field.isWonderRoom
-      ? hitsPhysical ? 'spd' : 'def'
-      : hitsPhysical ? 'def' : 'spd'
+  const defenseStat = move.overrideDefensiveStat || (hitsPhysical ? 'def' : 'spd');
+  desc.defenseEVs = getStatDescriptionText(
+    gen, defender, defenseStat, field.defenderSide.isPowerTrick, field.isWonderRoom
   );
+  if (field.defenderSide.isPowerTrick && (field.isWonderRoom !== hitsPhysical)) {
+    desc.isPowerTrickDefender = true;
+  }
+
   const boosts = defender.boosts[defenseStat];
-  desc.defenseEVs = getStatDescriptionText(gen, defender, defenseStat, defender.nature);
   if (boosts === 0 ||
       (isCritical && boosts > 0) ||
       move.ignoreDefensive) {
     defense = defender.rawStats[defenseStat];
-  } else if (attacker.hasAbility('Unaware')) {
+  } else if (attacker.hasAbility('Unaware') || move.name === 'Nihil Light') {
     defense = defender.rawStats[defenseStat];
     desc.attackerAbility = attacker.ability;
   } else {

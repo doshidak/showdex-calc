@@ -149,6 +149,8 @@ export function getMoveEffectiveness(
     return 1;
   } else if (move.named('Freeze-Dry') && type === 'Water') {
     return 2;
+  } else if (move.named('Nihil Light') && type === 'Fairy') {
+    return 1;
   } else {
     let effectiveness = gen.types.get(toID(move.type))!.effectiveness[type]!;
     if (effectiveness === 0 && isRingTarget) {
@@ -208,10 +210,19 @@ export function checkItem(pokemon: Pokemon, magicRoomActive?: boolean) {
   }
 }
 
-export function checkWonderRoom(pokemon: Pokemon, wonderRoomActive?: boolean) {
+export function checkRawStatChanges(
+  pokemon: Pokemon,
+  powerTrickActive?: boolean,
+  wonderRoomActive?: boolean,
+) {
+  if (powerTrickActive) {
+    [pokemon.rawStats.atk, pokemon.rawStats.def] = [pokemon.rawStats.def, pokemon.rawStats.atk];
+  }
   if (wonderRoomActive) {
     [pokemon.rawStats.def, pokemon.rawStats.spd] = [pokemon.rawStats.spd, pokemon.rawStats.def];
   }
+//  Power Trick acts first - the two checks could be separated into their own
+//  functions, but keeping them together ensures they apply in the correct order
 }
 
 export function checkIntimidate(_gen: Generation, _source: Pokemon, _target: Pokemon) {
@@ -581,9 +592,17 @@ export function getFinalDamage(
  * @param target Target pokemon (after stat modifications)
  * @returns 'Physical' | 'Special'
  */
-export function getShellSideArmCategory(source: Pokemon, target: Pokemon): MoveCategory {
-  const physicalDamage = source.stats.atk / target.stats.def;
-  const specialDamage = source.stats.spa / target.stats.spd;
+export function getShellSideArmCategory(
+  source: Pokemon,
+  target: Pokemon,
+  wonderRoomActive?: boolean
+): MoveCategory {
+  let physicalDamage = source.stats.atk / target.stats.def;
+  let specialDamage = source.stats.spa / target.stats.spd;
+  if (wonderRoomActive) {
+    physicalDamage = source.stats.atk / target.stats.spd;
+    specialDamage = source.stats.spa / target.stats.def;
+  }
   return physicalDamage > specialDamage ? 'Physical' : 'Special';
 }
 
@@ -659,15 +678,27 @@ export function getStatDescriptionText(
   gen: Generation,
   pokemon: Pokemon,
   stat: StatID,
-  natureName?: NatureName
+  powerTrickActive?: boolean,
+  wonderRoomActive?: boolean,
 ): string {
-  const nature = gen.natures.get(toID(natureName))!;
+  const initialStat: StatID = stat;
+  if (wonderRoomActive) {
+    if (stat === 'def') { stat = 'spd'; } else if (stat === 'spd') { stat = 'def'; }
+  }
+  if (powerTrickActive) {
+    if (stat === 'atk') { stat = 'def'; } else if (stat === 'def') { stat = 'atk'; }
+  }
+  //  decoding what checkRawStatChanges does
+  const nature = gen.natures.get(toID(pokemon.nature))!;
   let desc = pokemon.evs[stat] +
     (stat === 'hp' || nature.plus === nature.minus ? ''
     : nature.plus === stat ? '+'
     : nature.minus === stat ? '-'
     : '') + ' ' +
-     Stats.displayStat(stat);
+     Stats.displayStat(initialStat);
+  if (stat !== initialStat) {
+    desc = desc + ' (' + Stats.displayStat(stat) + ')';
+  }
   const iv = pokemon.ivs[stat];
   if (iv !== 31) desc += ` ${iv} IVs`;
   return desc;
