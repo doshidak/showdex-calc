@@ -278,8 +278,10 @@ $(".ability").bind("keyup change", function () {
 	} else {
 		$(this).closest(".poke-info").find(".abilityToggle").hide();
 	}
-	var boostedStat = $(this).closest(".poke-info").find(".boostedStat");
 
+	checkRivalry(ability);
+
+	var boostedStat = $(this).closest(".poke-info").find(".boostedStat");
 	if (ability === "Protosynthesis" || ability === "Quark Drive") {
 		boostedStat.show();
 		autosetQP($(this).closest(".poke-info"));
@@ -293,8 +295,8 @@ $(".ability").bind("keyup change", function () {
 	} else {
 		$(this).closest(".poke-info").find(".alliesFainted").val('0');
 		$(this).closest(".poke-info").find(".alliesFainted").hide();
-
 	}
+
 });
 
 function autosetQP(pokemon) {
@@ -432,33 +434,6 @@ function autosetTerrain(ability, i) {
 	}
 }
 
-$("#p1 .item").bind("keyup change", function () {
-	autosetStatus("#p1", $(this).val());
-});
-
-var lastManualStatus = {"#p1": "Healthy"};
-var lastAutoStatus = {"#p1": "Healthy"};
-function autosetStatus(p, item) {
-	var currentStatus = $(p + " .status").val();
-	if (currentStatus !== lastAutoStatus[p]) {
-		lastManualStatus[p] = currentStatus;
-	}
-	if (item === "Flame Orb") {
-		lastAutoStatus[p] = "Burned";
-		$(p + " .status").val("Burned");
-		$(p + " .status").change();
-	} else if (item === "Toxic Orb") {
-		lastAutoStatus[p] = "Badly Poisoned";
-		$(p + " .status").val("Badly Poisoned");
-		$(p + " .status").change();
-	} else {
-		lastAutoStatus[p] = "Healthy";
-		if (currentStatus !== lastManualStatus[p]) {
-			$(p + " .status").val(lastManualStatus[p]);
-			$(p + " .status").change();
-		}
-	}
-}
 
 $(".status").bind("keyup change", function () {
 	if ($(this).val() === 'Badly Poisoned') {
@@ -567,34 +542,50 @@ $(".move-selector").change(function () {
 
 $(".item").change(function () {
 	var itemName = $(this).val();
-	var $metronomeControl = $(this).closest('.poke-info').find('.metronome');
+	var pokeObj = $(this).closest('.poke-info');
+
+	var $metronomeControl = pokeObj.find('.metronome');
 	if (itemName === "Metronome") {
 		$metronomeControl.show();
 	} else {
 		$metronomeControl.hide();
 	}
 
+	if (itemName === "Flame Orb") {
+		pokeObj.find(".status").val("Burned");
+		pokeObj.find(".status").change();
+	} else if (itemName === "Toxic Orb") {
+		pokeObj.find(".status").val("Badly Poisoned");
+		pokeObj.find(".status").change();
+	} else if (($(this).attr('data-prev') === "Flame Orb" && pokeObj.find(".status").val() === "Burned") ||
+			($(this).attr('data-prev') === "Toxic Orb" && pokeObj.find(".status").val() === "Badly Poisoned")) {
+		pokeObj.find(".status").val("Healthy");
+		pokeObj.find(".status").change();
+	}
+
 	for (var i = 1; i <= 4; i++) {
 		var moveSelector = ".move" + i;
 		var moveHits = 3;
 
-		var moveName = $(this).closest(".poke-info").find(moveSelector).find(".select2-chosen").text();
+		var moveName = pokeObj.find(moveSelector).find(".select2-chosen").text();
 		var move = moves[moveName] || moves['(No Move)'];
 		if (move.multiaccuracy) {
 			moveHits = move.multihit;
-		} else if ($(this).closest(".poke-info").find(".ability").val() === 'Skill Link') {
+		} else if (pokeObj.find(".ability").val() === 'Skill Link') {
 			moveHits = 5;
-		} else if ($(this).closest(".poke-info").find(".item").val() === 'Loaded Dice') {
+		} else if (pokeObj.find(".item").val() === 'Loaded Dice') {
 			moveHits = 4;
 		}
-		$(this).closest(".poke-info").find(moveSelector).find(".move-hits").val(moveHits);
+		pokeObj.find(moveSelector).find(".move-hits").val(moveHits);
 	}
 
-	autosetQP($(this).closest(".poke-info"));
+	autosetQP(pokeObj);
+	pokeObj.find('.item').attr('data-prev', itemName);
 });
 
 function smogonAnalysis(pokemonName) {
 	var generation = ["rb", "gs", "rs", "dp", "bw", "xy", "sm", "ss", "sv"][gen - 1];
+	if (pokemonName === "Aegislash-Shield" || pokemonName === "Aegislash-Both") pokemonName = "Aegislash";
 	return "https://smogon.com/dex/" + generation + "/pokemon/" + pokemonName.toLowerCase() + "/";
 }
 
@@ -782,12 +773,17 @@ $(".set-selector").change(function () {
 		pokeObj.find(".current-hp").val(total);
 		pokeObj.find(".current-hp").attr("data-set", true);
 		calcHP(pokeObj);
+		genderSelector(
+			gen,
+			pokemon.gender,
+			pokeObj,
+			(regSets || randset) && set.gender ? set.gender : undefined
+		);
+		$(".ability").each(function () {
+			if (checkRivalry($(this).val())) return; // stop after any Rivalry is found, no need to look further
+		});
 		abilityObj.change();
 		itemObj.change();
-		if (pokemon.gender === "N") {
-			pokeObj.find(".gender").parent().hide();
-			pokeObj.find(".gender").val("");
-		} else pokeObj.find(".gender").parent().show();
 	}
 });
 
@@ -924,6 +920,8 @@ $(".forme").change(function () {
 
 	$(this).parent().siblings().find(".type1").val(altForme.types[0]);
 	$(this).parent().siblings().find(".type2").val(altForme.types[1] ? altForme.types[1] : "");
+	genderSelector(gen, altForme.gender, container.parent(), container.parent().find(".gender").val());
+	$(this).parent().siblings().find(".analysis").attr("href", smogonAnalysis($(this).val()));
 	for (var i = 0; i < LEGACY_STATS[9].length; i++) {
 		var baseStat = container.find("." + LEGACY_STATS[9][i]).find(".base");
 		baseStat.val(altForme.bs[LEGACY_STATS[9][i]]);
@@ -935,16 +933,15 @@ $(".forme").change(function () {
 		$(this).parent().siblings().find(".teraToggle").prop("checked", true);
 	}
 	var isRandoms = $("#randoms").prop("checked");
-	var pokemonSets = isRandoms ? gen >= 8 ? randdex[pokemonName][setName] :
-		randdex[pokemonName] : setdex[pokemonName];
-	var chosenSet = pokemonSets && pokemonSets[setName];
+	var pokemonSets = isRandoms ? randdex[pokemonName] : setdex[pokemonName];
+	var chosenSet = isRandoms && gen < 8 ? pokemonSets : pokemonSets && pokemonSets[setName];
 	var greninjaSet = $(this).val().indexOf("Greninja") !== -1;
 	var isAltForme = $(this).val() !== pokemonName;
 	if (isAltForme && abilities.indexOf(altForme.abilities[0]) !== -1 && !greninjaSet) {
 		container.find(".ability").val(altForme.abilities[0]);
 	} else if (!isAltForme && abilities.indexOf(altForme.abilities[0]) !== -1 && !greninjaSet) {
-		if (chosenSet && chosenSet.ability) {
-			container.find(".ability").val(chosenSet.ability);
+		if (chosenSet && (chosenSet.ability || chosenSet.abilities[0])) {
+			container.find(".ability").val(isRandoms ? chosenSet.abilities[0] : chosenSet.ability);
 		} else {
 			container.find(".ability").val(altForme.abilities[0]);
 		}
@@ -1062,7 +1059,8 @@ function createPokemon(pokeInfo) {
 			level: set.level,
 			ability: set.ability,
 			abilityOn: true,
-			item: set.item && typeof set.item !== "undefined" && (set.item === "Eviolite" || set.item.indexOf("ite") < 0) ? set.item : "",
+			item: set.item && typeof set.item !== "undefined" && (set.item === "Eviolite" || set.item === "White Herb" || set.item.indexOf("ite") < 0) ? set.item : "",
+			gender: set.gender,
 			nature: set.nature,
 			ivs: ivs,
 			evs: evs,
@@ -1094,11 +1092,13 @@ function createPokemon(pokeInfo) {
 
 		var ability = pokeInfo.find(".ability").val();
 		var item = pokeInfo.find(".item").val();
+		var gender = pokeInfo.find(".gender").val();
 		var isDynamaxed = pokeInfo.find(".max").prop("checked");
 		var teraType = pokeInfo.find(".teraToggle").is(":checked") ? pokeInfo.find(".teraType").val() : undefined;
 		var opts = {
 			ability: ability,
 			item: item,
+			gender: gender,
 			isDynamaxed: isDynamaxed,
 			teraType: teraType,
 			species: name,
@@ -1114,7 +1114,7 @@ function createPokemon(pokeInfo) {
 			ability: ability,
 			abilityOn: pokeInfo.find(".abilityToggle").is(":checked"),
 			item: item,
-			gender: pokeInfo.find(".gender").is(":visible") ? getGender(pokeInfo.find(".gender").val()) : "N",
+			gender: gender,
 			nature: pokeInfo.find(".nature").val(),
 			ivs: ivs,
 			evs: evs,
@@ -1144,6 +1144,25 @@ function getGender(gender) {
 	if (!gender || gender === 'genderless' || gender === 'N') return 'N';
 	if (gender.toLowerCase() === 'male' || gender === 'M') return 'M';
 	return 'F';
+}
+
+function genderSelector(gen, speciesGender, pokeObj, setGender) {
+	if (gen === 1) {
+		pokeObj.find(".gender").val("");
+		pokeObj.find(".gender").parent().hide();
+		return;
+	}
+	pokeObj.find(".gender").parent().show();
+	pokeObj.find(".gender").val(setGender || speciesGender || "");
+}
+
+function checkRivalry(ability) {
+	if (ability === "Rivalry") {
+		$(".gender").each(function () {
+			if ($(this).val() === "") $(this).val("M");
+		});
+		return true;
+	}
 }
 
 function getMoveDetails(moveInfo, opts) {
@@ -1211,6 +1230,7 @@ function createField() {
 	var isHelpingHand = [$("#helpingHandL").prop("checked"), $("#helpingHandR").prop("checked")];
 	var isTailwind = [$("#tailwindL").prop("checked"), $("#tailwindR").prop("checked")];
 	var isFlowerGift = [$("#flowerGiftL").prop("checked"), $("#flowerGiftR").prop("checked")];
+	var isPowerTrick = [$("#powerTrickL").prop("checked"), $("#powerTrickR").prop("checked")];
 	var isSteelySpirit = [$("#steelySpiritL").prop("checked"), $("#steelySpiritR").prop("checked")];
 	var isFriendGuard = [$("#friendGuardL").prop("checked"), $("#friendGuardR").prop("checked")];
 	var isAuroraVeil = [$("#auroraVeilL").prop("checked"), $("#auroraVeilR").prop("checked")];
@@ -1237,6 +1257,7 @@ function createField() {
 			isTailwind: isTailwind[i],
 			isHelpingHand: isHelpingHand[i],
 			isFlowerGift: isFlowerGift[i],
+			isPowerTrick: isPowerTrick[i],
 			isSteelySpirit: isSteelySpirit[i],
 			isFriendGuard: isFriendGuard[i],
 			isAuroraVeil: isAuroraVeil[i],
@@ -1484,6 +1505,8 @@ function clearField() {
 	$("#singles-format").prop("checked", true);
 	$("#clear").prop("checked", true);
 	$("#gscClear").prop("checked", true);
+	$("#magicroom").prop("checked", false);
+	$("#wonderroom").prop("checked", false);
 	$("#gravity").prop("checked", false);
 	$("#srL").prop("checked", false);
 	$("#srR").prop("checked", false);
@@ -1509,6 +1532,12 @@ function clearField() {
 	$("#protectR").prop("checked", false);
 	$("#leechSeedL").prop("checked", false);
 	$("#leechSeedR").prop("checked", false);
+	$("#flowerGiftL").prop("checked", false);
+	$("#flowerGiftR").prop("checked", false);
+	$("#powerTrickL").prop("checked", false);
+	$("#powerTrickR").prop("checked", false);
+	$("#steelySpiritL").prop("checked", false);
+	$("#steelySpiritR").prop("checked", false);
 	$("#saltCureL").prop("checked", false);
 	$("#saltCureR").prop("checked", false);
 	$("#foresightL").prop("checked", false);
@@ -1523,6 +1552,8 @@ function clearField() {
 	$("#auroraVeilR").prop("checked", false);
 	$("#batteryL").prop("checked", false);
 	$("#batteryR").prop("checked", false);
+	$("#powerSpotL").prop("checked", false);
+	$("#powerSpotR").prop("checked", false);
 	$("#switchingL").prop("checked", false);
 	$("#switchingR").prop("checked", false);
 	$("input:checkbox[name='terrain']").prop("checked", false);

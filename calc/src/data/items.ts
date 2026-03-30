@@ -282,6 +282,7 @@ const BW = DPP.concat([
   'Normal Gem',
   'Plume Fossil',
   'Poison Gem',
+  'Pretty Feather',
   'Prism Scale',
   'Psychic Gem',
   'Red Card',
@@ -293,60 +294,60 @@ const BW = DPP.concat([
   'Water Gem',
 ]);
 
-export const MEGA_STONES: {[species: string]: string} = {
-  Absolite: 'Absol',
-  Abomasite: 'Abomasnow',
-  Aerodactylite: 'Aerodactyl',
-  Aggronite: 'Aggron',
-  Alakazite: 'Alakazam',
-  Altarianite: 'Altaria',
-  Ampharosite: 'Ampharos',
-  Audinite: 'Audino',
-  Banettite: 'Banette',
-  Beedrillite: 'Beedrill',
-  Blastoisinite: 'Blastoise',
-  Blazikenite: 'Blaziken',
-  Cameruptite: 'Camerupt',
-  'Charizardite X': 'Charizard',
-  'Charizardite Y': 'Charizard',
-  Crucibellite: 'Crucibelle',
-  Diancite: 'Diancie',
-  Galladite: 'Gallade',
-  Garchompite: 'Garchomp',
-  Gardevoirite: 'Gardevoir',
-  Gengarite: 'Gengar',
-  Glalitite: 'Glalie',
-  Gyaradosite: 'Gyarados',
-  Heracronite: 'Heracross',
-  Houndoominite: 'Houndoom',
-  Kangaskhanite: 'Kangaskhan',
-  Latiasite: 'Latias',
-  Latiosite: 'Latios',
-  Lopunnite: 'Lopunny',
-  Lucarionite: 'Lucario',
-  Manectite: 'Manectric',
-  Mawilite: 'Mawile',
-  Medichamite: 'Medicham',
-  Metagrossite: 'Metagross',
-  'Mewtwonite X': 'Mewtwo',
-  'Mewtwonite Y': 'Mewtwo',
-  Pidgeotite: 'Pidgeot',
-  Pinsirite: 'Pinsir',
-  Sablenite: 'Sableye',
-  Salamencite: 'Salamence',
-  Sceptilite: 'Sceptile',
-  Scizorite: 'Scizor',
-  Sharpedonite: 'Sharpedo',
-  Slowbronite: 'Slowbro',
-  Steelixite: 'Steelix',
-  Swampertite: 'Swampert',
-  Tyranitarite: 'Tyranitar',
-  Venusaurite: 'Venusaur',
+const GEN_6_MEGA_STONES: {[item: string]: {[megaEvolves: string]: string}} = {
+  Abomasite: {Abomasnow: 'Abomasnow-Mega'},
+  Absolite: {Absol: 'Absol-Mega'},
+  Aerodactylite: {Aerodactyl: 'Aerodactyl-Mega'},
+  Aggronite: {Aggron: 'Aggron-Mega'},
+  Alakazite: {Alakazam: 'Alakazam-Mega'},
+  Altarianite: {Altaria: 'Altaria-Mega'},
+  Ampharosite: {Ampharos: 'Ampharos-Mega'},
+  Audinite: {Audino: 'Audino-Mega'},
+  Banettite: {Banette: 'Banette-Mega'},
+  Beedrillite: {Beedrill: 'Beedrill-Mega'},
+  Blastoisinite: {Blastoise: 'Blastoise-Mega'},
+  Blazikenite: {Blaziken: 'Blaziken-Mega'},
+  Cameruptite: {Camerupt: 'Camerupt-Mega'},
+  'Charizardite X': {Charizard: 'Charizard-Mega-X'},
+  'Charizardite Y': {Charizard: 'Charizard-Mega-Y'},
+  Crucibellite: {Crucibelle: 'Crucibelle-Mega'},
+  Diancite: {Diancie: 'Diancie-Mega'},
+  Galladite: {Gallade: 'Gallade-Mega'},
+  Garchompite: {Garchomp: 'Garchomp-Mega'},
+  Gardevoirite: {Gardevoir: 'Gardevoir-Mega'},
+  Gengarite: {Gengar: 'Gengar-Mega'},
+  Glalitite: {Glalie: 'Glalie-Mega'},
+  Gyaradosite: {Gyarados: 'Gyarados-Mega'},
+  Heracronite: {Heracross: 'Heracross-Mega'},
+  Houndoominite: {Houndoom: 'Houndoom-Mega'},
+  Kangaskhanite: {Kangaskhan: 'Kangaskhan-Mega'},
+  Latiasite: {Latias: 'Latias-Mega'},
+  Latiosite: {Latios: 'Latios-Mega'},
+  Lopunnite: {Lopunny: 'Lopunny-Mega'},
+  Lucarionite: {Lucario: 'Lucario-Mega'},
+  Manectite: {Manectric: 'Manectric-Mega'},
+  Mawilite: {Mawile: 'Mawile-Mega'},
+  Medichamite: {Medicham: 'Medicham-Mega'},
+  Metagrossite: {Metagross: 'Metagross-Mega'},
+  'Mewtwonite X': {Mewtwo: 'Mewtwo-Mega-X'},
+  'Mewtwonite Y': {Mewtwo: 'Mewtwo-Mega-Y'},
+  Pidgeotite: {Pidgeot: 'Pidgeot-Mega'},
+  Pinsirite: {Pinsir: 'Pinsir-Mega'},
+  Sablenite: {Sableye: 'Sableye-Mega'},
+  Salamencite: {Salamence: 'Salamence-Mega'},
+  Sceptilite: {Sceptile: 'Sceptile-Mega'},
+  Scizorite: {Scizor: 'Scizor-Mega'},
+  Sharpedonite: {Sharpedo: 'Sharpedo-Mega'},
+  Slowbronite: {Slowbro: 'Slowbro-Mega'},
+  Steelixite: {Steelix: 'Steelix-Mega'},
+  Swampertite: {Swampert: 'Swampert-Mega'},
+  Tyranitarite: {Tyranitar: 'Tyranitar-Mega'},
+  Venusaurite: {Venusaur: 'Venusaur-Mega'},
 };
 
 const XY = BW.concat(
   [
-    ...Object.keys(MEGA_STONES),
+    ...Object.keys(GEN_6_MEGA_STONES),
     'Assault Vest',
     'Blue Orb',
     'Fairy Gem',
@@ -470,29 +471,83 @@ SS.push('Utility Umbrella', 'Vile Vial');
 // Because we support National Dex all Past items are added back in
 SS.push(...GSC_ONLY, 'Old Amber');
 
-const SV = SS.concat([
-  'Adamant Crystal',
-  'Auspicious Armor',
-  'Ability Shield',
-  'Booster Energy',
-  'Clear Amulet',
-  'Cornerstone Mask',
-  'Covert Cloak',
-  'Fairy Feather',
-  'Hearthflame Mask',
-  'Loaded Dice',
-  'Malicious Armor',
-  'Masterpiece Teacup',
-  'Metal Alloy',
-  'Mirror Herb',
-  'Punching Glove',
-  'Lustrous Globe',
-  'Griseous Core',
-  'Strange Ball',
-  'Syrupy Apple',
-  'Unremarkable Teacup',
-  'Wellspring Mask',
-]);
+const ZA_MEGA_STONES: {[item: string]: {[megaEvolves: string]: string}} = {
+  'Absolite Z': {Absol: 'Absol-Mega-Z'},
+  Barbaracite: {Barbaracle: 'Barbaracle-Mega'},
+  Baxcalibrite: {Baxcalibur: 'Baxcalibur-Mega'},
+  Chandelurite: {Chandelure: 'Chandelure-Mega'},
+  Chesnaughtite: {Chesnaught: 'Chesnaught-Mega'},
+  Chimechite: {Chimecho: 'Chimecho-Mega'},
+  Clefablite: {Clefable: 'Clefable-Mega'},
+  Crabominite: {Crabominable: 'Crabominable-Mega'},
+  Darkranite: {Darkrai: 'Darkrai-Mega'},
+  Delphoxite: {Delphox: 'Delphox-Mega'},
+  Dragalgite: {Dragalge: 'Dragalge-Mega'},
+  Dragoninite: {Dragonite: 'Dragonite-Mega'},
+  Drampanite: {Drampa: 'Drampa-Mega'},
+  Eelektrossite: {Eelektross: 'Eelektross-Mega'},
+  Emboarite: {Emboar: 'Emboar-Mega'},
+  Excadrite: {Excadrill: 'Excadrill-Mega'},
+  Falinksite: {Falinks: 'Falinks-Mega'},
+  Feraligite: {Feraligatr: 'Feraligatr-Mega'},
+  Floettite: {'Floette-Eternal': 'Floette-Mega'},
+  Froslassite: {Froslass: 'Froslass-Mega'},
+  'Garchompite Z': {Garchomp: 'Garchomp-Mega-Z'},
+  Glimmoranite: {Glimmora: 'Glimmora-Mega'},
+  Golisopite: {Golisopod: 'Golisopod-Mega'},
+  Golurkite: {Golurk: 'Golurk-Mega'},
+  Greninjite: {Greninja: 'Greninja-Mega'},
+  Hawluchanite: {Hawlucha: 'Hawlucha-Mega'},
+  Heatranite: {Heatran: 'Heatran-Mega'},
+  'Lucarionite Z': {Lucario: 'Lucario-Mega-Z'},
+  Magearnite: {Magearna: 'Magearna-Mega', 'Magearna-Original': 'Magearna-Original-Mega'},
+  Malamarite: {Malamar: 'Malamar-Mega'},
+  Meganiumite: {Meganium: 'Meganium-Mega'},
+  Meowsticite: {Meowstic: 'Meowstic-M-Mega', 'Meowstic-F': 'Meowstic-F-Mega'},
+  Pyroarite: {Pyroar: 'Pyroar-Mega'},
+  'Raichunite X': {Raichu: 'Raichu-Mega-X'},
+  'Raichunite Y': {Raichu: 'Raichu-Mega-Y'},
+  Scolipite: {Scolipede: 'Scolipede-Mega'},
+  Scovillainite: {Scovillain: 'Scovillain-Mega'},
+  Scraftinite: {Scrafty: 'Scrafty-Mega'},
+  Skarmorite: {Skarmory: 'Skarmory-Mega'},
+  Staraptite: {Staraptor: 'Staraptor-Mega'},
+  Starminite: {Starmie: 'Starmie-Mega'},
+  Tatsugirinite: {
+    Tatsugiri: 'Tatsugiri-Curly-Mega',
+    'Tatsugiri-Droopy': 'Tatsugiri-Droopy-Mega',
+    'Tatsugiri-Stretchy': 'Tatsugiri-Stretchy-Mega',
+  },
+  Victreebelite: {Victreebel: 'Victreebel-Mega'},
+  Zeraorite: {Zeraora: 'Zeraora-Mega'},
+  Zygardite: {'Zygarde-Complete': 'Zygarde-Mega'},
+};
+const SV = SS.concat(
+  [
+    ...Object.keys(ZA_MEGA_STONES),
+    'Adamant Crystal',
+    'Auspicious Armor',
+    'Ability Shield',
+    'Booster Energy',
+    'Clear Amulet',
+    'Cornerstone Mask',
+    'Covert Cloak',
+    'Fairy Feather',
+    'Hearthflame Mask',
+    'Loaded Dice',
+    'Malicious Armor',
+    'Masterpiece Teacup',
+    'Metal Alloy',
+    'Mirror Herb',
+    'Punching Glove',
+    'Lustrous Globe',
+    'Griseous Core',
+    'Strange Ball',
+    'Syrupy Apple',
+    'Unremarkable Teacup',
+    'Wellspring Mask',
+  ].sort()
+);
 
 const BERRIES: {[berry: string]: {t: I.TypeName; p: number}} = {
   'Aguav Berry': {t: 'Dragon', p: 80},
@@ -574,6 +629,8 @@ const BERRIES: {[berry: string]: {t: I.TypeName; p: number}} = {
   'Yache Berry': {t: 'Ice', p: 80},
 };
 
+export const MEGA_STONES = Object.assign({}, GEN_6_MEGA_STONES, ZA_MEGA_STONES);
+
 export const ITEMS = [[], RBY, GSC, ADV, DPP, BW, XY, SM, SS, SV];
 
 export class Items implements I.Items {
@@ -598,7 +655,7 @@ class Item implements I.Item {
   readonly kind: 'Item';
   readonly id: I.ID;
   readonly name: I.ItemName;
-  readonly megaEvolves?: I.SpeciesName;
+  readonly megaStone?: Readonly<{[megaEvolves: I.SpeciesName]: I.SpeciesName}>;
   readonly isBerry?: boolean;
   readonly naturalGift?: Readonly<{basePower: number; type: I.TypeName}>;
 
@@ -606,7 +663,7 @@ class Item implements I.Item {
     this.kind = 'Item';
     this.id = toID(name);
     this.name = name as I.ItemName;
-    this.megaEvolves = MEGA_STONES[name] as I.SpeciesName;
+    this.megaStone = MEGA_STONES[name] as Readonly<{[megaEvolves: I.SpeciesName]: I.SpeciesName}>;
     const berry = BERRIES[name];
     if (berry) {
       this.isBerry = true;
