@@ -40,7 +40,7 @@ Sooo... what's different?
 * Disabled web client.
   - Web client build scripts have been bypassed in the `postinstall` script.
   - For our purposes, we're only interested in the *ＭＥＡＴ* inside the [`calc`](/calc) directory ( ͡° ͜ʖ ͡°)
-* `yarn` Classic in lieu of `npm`, similar to Showdex.
+* `pnpm` in lieu of `npm`, similar to Showdex.
 
 **More specifically:**
 
@@ -59,14 +59,14 @@ Many of these modifications were made to account for real-time battle conditions
 
 ### Requirements
 
-* **`node`** LTS Hydrogen v18
-* **`yarn`** Classic v1.22.0+
+* **`node`** LTS Jod v24
+* **`pnpm`** v10.0.0+
 * **`bash`** ([Windows WSL](https://docs.microsoft.com/en-us/windows/wsl/install), macOS, or Linux)
 
 ## ①&nbsp;&nbsp;Installation
 
 > [!CAUTION]
-> Without any additional package configuration (that I'm too lazy to do rn), attempting to install this from a package manager (e.g., `yarn add doshidak/showdex-calc`) will fail! You **must** install this custom fork into your local copy of Showdex using the cumbersome method detailed below. Sorry :c
+> Without any additional package configuration (that I'm too lazy to do rn), attempting to install this from a package manager (e.g., `pnpm add doshidak/showdex-calc`) will fail! You **must** install this custom fork into your local copy of Showdex using the cumbersome method detailed below. Sorry :c
 
 > [!IMPORTANT]
 > I'm assuming you've already cloned `doshidak/showdex.git` (i.e., Showdex's source code), which exists under `showdex` in your favorite directory.
@@ -74,13 +74,13 @@ Many of these modifications were made to account for real-time battle conditions
 1. `cd` into your favorite directory.
 2. `git clone git@github.com:doshidak/showdex-calc.git`
 3. `cd showdex-calc`
-4. `yarn`
+4. `pnpm install`
 5. `cd ../showdex`
 6. `rm -r node_modules/@smogon/calc/dist node_modules/@smogon/calc/src`
 7. `cp -r ../showdex-calc/calc/dist ../showdex-calc/calc/src node_modules/@smogon/calc`
-8. `yarn patch-package @smogon/calc`
-9. `yarn`
-10. `yarn dev:re`
+8. `pnpm patch-package @smogon/calc`
+9. `pnpm install`
+10. `pnpm dev:re`
 11. ???
 12. Profit!
 
@@ -91,7 +91,7 @@ Many of these modifications were made to account for real-time battle conditions
 > Technically, copying the `showdex-calc/calc/dist/src` directory into `node_modules/@smogon/calc` has no effect (uses the files in `dist` instead) & is completely optional, but I do it anyway so you can peep the source code. Fun fact: You can look through your local Showdex's `node_modules/@smogon/calc/src` right now to see the source code you see here!
 
 > [!TIP]
-> Showdex's `yarn dev[:chrome|:firefox]:re` script is an alias of its `yarn cache:purge && yarn dev[:chrome|:firefox]` scripts (also `yarn dev` itself is an alias of `yarn dev:chrome`). Running `yarn cache:purge` is necessary if you've changed anything inside `node_modules` (including the `@smogon/calc` package!) after running `yarn dev` since the stale changes will still persist in (& be loaded from) `node_modules/.cache/babel`.
+> Showdex's `pnpm dev[:chrome|:firefox]:re` script is an alias of its `pnpm cache:purge && pnpm dev[:chrome|:firefox]` scripts (also `pnpm dev` itself is an alias of `pnpm dev:chrome`). Running `pnpm cache:purge` is necessary if you've changed anything inside `node_modules` (including the `@smogon/calc` package!) after running `pnpm dev` since the stale changes will still persist in (& be loaded from) `node_modules/.cache/babel`.
 
 **wait, you mean you do this *every* time for *every* Showdex release ???**
 

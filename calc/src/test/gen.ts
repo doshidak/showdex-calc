@@ -116,7 +116,7 @@ class Item implements I.Item {
     this.kind = 'Item';
     this.id = item.id as I.ID;
     this.name = item.name as I.ItemName;
-    this.megaStone = item.megaStone;
+    this.megaStone = item.megaStone as unknown as typeof this.megaStone;
     this.isBerry = item.isBerry;
     this.naturalGift = item.naturalGift && {
       basePower: item.naturalGift.basePower - (gen === 2 ? 20 : 0),
@@ -493,7 +493,7 @@ const NATDEX_BANNED = [
 
 function exists(val: D.Ability | D.Item | D.Move | D.Species | D.Type, gen: I.GenerationNum) {
   if (!val.exists || val.id === 'noability') return false;
-  if (val.kind === 'Species' && val.isCosmeticForme) return false;
+  if (val.kind === 'Species' && (val as unknown as {isCosmeticForme?: boolean}).isCosmeticForme) return false;
   if (gen === 7 && val.isNonstandard === 'LGPE') return true;
   if (gen >= 8) {
     if (gen === 8) {
