@@ -9,7 +9,7 @@
     <tr>
       <th align="center">&nbsp;Currently <a href="https://github.com/doshidak/showdex-calc/releases/tag/v1.3.0"><s>v1.3.0</s></a>&nbsp;</th>
       <th align="center">&nbsp;Powering <a href="https://github.com/doshidak/showdex"><code>showdex</code></a> · <a href="https://github.com/doshidak/showdex/releases/tag/v1.3.0"><s>v1.3.0</s></a>&nbsp;</th>
-      <th align="center">&nbsp;Patches <a href="https://github.com/smogon/damage-calc/tree/master/calc"><code>@smogon/calc</code></a> · <a href="https://npmjs.com/package/@smogon/calc/v/0.10.0">v0.10.0</a> &rarr; <a href="https://github.com/doshidak/showdex-calc/commit/565b2275674a791fadd093eef9c710314f584950"><code>565b227</code></a>&nbsp;</th>
+      <th align="center">&nbsp;Patches <a href="https://github.com/smogon/damage-calc/tree/master/calc"><code>@smogon/calc</code></a> · <a href="https://npmjs.com/package/@smogon/calc/v/0.11.0">v0.11.0</a> &rarr; <a href="https://github.com/doshidak/showdex-calc/commit/c4d171797e80f6a4cdd3e58818b2a6f81b2d5519"><code>c4d1717</code></a>&nbsp;</th>
     </tr>
   </thead>
 </table>
@@ -78,14 +78,19 @@ Many of these modifications were made to account for real-time battle conditions
 5. `cd ../showdex`
 6. `rm -r node_modules/@smogon/calc/dist node_modules/@smogon/calc/src`
 7. `cp -r ../showdex-calc/calc/dist ../showdex-calc/calc/src node_modules/@smogon/calc`
-8. `pnpm patch-package @smogon/calc`
-9. `pnpm install`
-10. `pnpm dev:re`
-11. ???
-12. Profit!
+8. `pnpm patch @smogon/calc@<version>` &mdash; pnpm spits out an editable dir path
+9. Replace `dist/` + `src/` in that dir with `../showdex-calc/calc/dist` + `../showdex-calc/calc/src`
+10. `pnpm patch-commit <that-editable-dir-path>` &mdash; writes the patchfile to `patches/`
+11. `pnpm install`
+12. `pnpm dev:re`
+13. ???
+14. Profit!
 
 > [!TIP]
-> Creating the Patchfile in step 8 is completely optional if you just want to quickly test some changes.
+> Steps 8-10 are completely optional if you just want to quickly test some changes &mdash; the manual `cp` from step 7 is enough until the next `pnpm install` blows it away.
+
+> [!NOTE]
+> Steps 8-10 used to be `pnpm patch-package @smogon/calc` (back when Showdex used the [`patch-package`](https://npmjs.com/package/patch-package) tool), but [Showdex migrated to pnpm-native patches](https://github.com/doshidak/showdex/commit/1f7a412c) so the flow has changed accordingly.
 
 > [!NOTE]
 > Technically, copying the `showdex-calc/calc/dist/src` directory into `node_modules/@smogon/calc` has no effect (uses the files in `dist` instead) & is completely optional, but I do it anyway so you can peep the source code. Fun fact: You can look through your local Showdex's `node_modules/@smogon/calc/src` right now to see the source code you see here!
