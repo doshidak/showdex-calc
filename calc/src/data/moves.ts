@@ -4935,7 +4935,7 @@ const ZA_PATCH: {[name: string]: DeepPartial<MoveData>} = {
 
 const SV: {[name: string]: MoveData} = extend(true, {}, SS, SV_PATCH, ZA_PATCH);
 
-const ChampionsLegal = [
+const CHAMPIONS_LIST = [
   '(No Move)',
   'Accelerock',
   'Acid Armor',
@@ -4968,6 +4968,7 @@ const ChampionsLegal = [
   'Axe Kick',
   'Baby-Doll Eyes',
   'Baneful Bunker',
+  'Barb Barrage',
   'Baton Pass',
   'Beak Blast',
   'Beat Up',
@@ -5197,6 +5198,7 @@ const ChampionsLegal = [
   'Magic Room',
   'Magnet Rise',
   'Magnetic Flux',
+  'Make It Rain',
   'Matcha Gotcha',
   'Mean Look',
   'Mega Kick',
@@ -5224,6 +5226,7 @@ const ChampionsLegal = [
   'Night Daze',
   'Night Shade',
   'Night Slash',
+  'No Retreat',
   'Noble Roar',
   'Nuzzle',
   'Outrage',
@@ -5246,7 +5249,6 @@ const ChampionsLegal = [
   'Poltergeist',
   'Population Bomb',
   'Pounce',
-  'Pound',
   'Power Gem',
   'Power Shift',
   'Power Split',
@@ -5267,6 +5269,7 @@ const ChampionsLegal = [
   'Quick Attack',
   'Quick Guard',
   'Quiver Dance',
+  'Rage Fist',
   'Rage Powder',
   'Raging Bull',
   'Raging Fury',
@@ -5336,6 +5339,7 @@ const ChampionsLegal = [
   'Spicy Extract',
   'Spikes',
   'Spiky Shield',
+  'Spirit Break',
   'Spirit Shackle',
   'Spit Up',
   'Spite',
@@ -5390,6 +5394,7 @@ const ChampionsLegal = [
   'Thunderbolt',
   'Tickle',
   'Tidy Up',
+  'Topsy-Turvy',
   'Torch Song',
   'Torment',
   'Toxic',
@@ -5434,40 +5439,49 @@ const ChampionsLegal = [
   'Zen Headbutt',
 ];
 
-const Champions_AVAILABLE: {[name: string]: MoveData} = {};
-for (const move of ChampionsLegal) {
-  Champions_AVAILABLE[move] = SV[move];
-}
-
-const Champions_PATCH: {[name: string]: DeepPartial<MoveData>} = {
+const CHAMPIONS_PATCH: {[name: string]: DeepPartial<MoveData>} = {
+  'Anchor Shot': {bp: 90},
   'Apple Acid': {bp: 90},
+  'Astral Barrage': {bp: 110},
   'Beak Blast': {bp: 120},
+  'Blood Moon': {bp: 130},
+  'Bolt Beak': {bp: 80},
   'Bone Rush': {bp: 30},
   'Crush Claw': {isSlicing: true},
   'Dire Claw': {isSlicing: true},
   'Dragon Claw': {isSlicing: true},
   'Dragon Cheer': {isSound: true},
+  'Dragon Hammer': {bp: 100},
   'Fire Lash': {bp: 90},
   'First Impression': {bp: 100},
+  'Fishious Rend': {bp: 80},
+  'Gear Grind': {bp: 60},
   'Grav Apple': {bp: 90},
+  'Hyper Drill': {bp: 120},
   'Infernal Parade': {bp: 65},
+  'Make It Rain': {self: {boosts: {spa: -2}}},
+  'Metal Claw': {isSlicing: true},
   'Mountain Gale': {bp: 120},
   'Night Daze': {bp: 90},
   'Psyshield Bash': {bp: 90},
+  'Revelation Dance': {bp: 100},
   'Shadow Claw': {isSlicing: true},
   'Snap Trap': {type: 'Steel'},
+  'Snipe Shot': {bp: 85},
   'Spirit Shackle': {bp: 90},
+  'Triple Dive': {bp: 35},
   'Trop Kick': {bp: 85},
 };
 
-const Champions: {[name: string]: MoveData} = extend(
-  true, {}, Champions_AVAILABLE, Champions_PATCH
+const CHAMPIONS: {[name: string]: MoveData} = extend(
+  true, {},
+  Object.fromEntries(CHAMPIONS_LIST.map(m => [m, SV[m]])), CHAMPIONS_PATCH
 );
 
-// @ts-ignore readonly
-delete Champions['Freeze-Dry'].secondaries;
+// @ts-expect-error readonly
+delete CHAMPIONS['Freeze-Dry'].secondaries;
 
-export const MOVES = [Champions, RBY, GSC, ADV, DPP, BW, XY, SM, SS, SV];
+export const MOVES = [CHAMPIONS, RBY, GSC, ADV, DPP, BW, XY, SM, SS, SV];
 
 export class Moves implements I.Moves {
   private readonly gen: I.GenerationNum;
