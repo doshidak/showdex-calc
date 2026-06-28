@@ -272,7 +272,7 @@ $(".ability").bind("keyup change", function () {
 		$(this).closest(".poke-info").find(moveSelector).find(".move-hits").val(moveHits);
 	}
 
-	var TOGGLE_ABILITIES = ['Flash Fire', 'Intimidate', 'Minus', 'Plus', 'Slow Start', 'Unburden', 'Stakeout', 'Teraform Zero'];
+	var TOGGLE_ABILITIES = ['Flash Fire', 'Intimidate', 'Minus', 'Plus', 'Slow Start', 'Unburden', 'Analytic', 'Stakeout', 'Teraform Zero'];
 
 	if (TOGGLE_ABILITIES.indexOf(ability) >= 0) {
 		$(this).closest(".poke-info").find(".abilityToggle").show();
@@ -499,7 +499,8 @@ $(".move-selector").change(function () {
 	$(this).attr('data-prev', moveName);
 	moveGroupObj.children(".move-type").val(move.type);
 	moveGroupObj.children(".move-cat").val(move.category);
-	moveGroupObj.children(".move-crit").prop("checked", move.willCrit === true);
+	var isDynamaxed = $(this).closest(".poke-info").find(".max").prop("checked");
+	moveGroupObj.children(".move-crit").prop("checked", !isDynamaxed && move.willCrit === true);
 
 	var stat = move.category === 'Special' ? 'spa' : 'atk';
 	if (Array.isArray(move.multihit) || (!isNaN(move.multihit) && move.multiaccuracy)) {
@@ -643,9 +644,11 @@ $(".set-selector").change(function () {
 			$(this).closest('.poke-info').find(".extraSetAbilities").text(listAbilities.join(', '));
 			if (gen >= 2) $(this).closest('.poke-info').find(".item-pool").show();
 			$(this).closest('.poke-info').find(".extraSetItems").text(listItems.join(', '));
-			if (gen !== 8 && gen !== 1) {
+			if (!(gen === 8 && setName === 'BDSP Randoms') && gen !== 1) {
 				$(this).closest('.poke-info').find(".role-pool").show();
 				if (gen >= 9) $(this).closest('.poke-info').find(".tera-type-pool").show();
+			} else {
+				$(this).closest('.poke-info').find(".role-pool").hide();
 			}
 			var listRoles = randset.roles ? Object.keys(randset.roles) : [];
 			$(this).closest('.poke-info').find(".extraSetRoles").text(listRoles.join(', '));
@@ -703,7 +706,7 @@ $(".set-selector").change(function () {
 			}
 			var setMoves = set.moves;
 			if (randset) {
-				if (gen === 8 || gen === 1) {
+				if ((gen === 8 && setName === 'BDSP Randoms') || gen === 1) {
 					setMoves = randset.moves;
 				} else {
 					setMoves = [];
@@ -1725,6 +1728,7 @@ function isPokeInfoGrounded(pokeInfo) {
 		  teraType ? teraType !== "Flying" : pokeInfo.find(".type1").val() !== "Flying" &&
         teraType ? teraType !== "Flying" : pokeInfo.find(".type2").val() !== "Flying" &&
         pokeInfo.find(".ability").val() !== "Levitate" &&
+        pokeInfo.find(".ability").val() !== "Eelevate" &&
         pokeInfo.find(".item").val() !== "Air Balloon"
 	);
 }
