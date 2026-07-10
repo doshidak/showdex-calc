@@ -30,12 +30,17 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: ${{ matrix.node-version }}
-    # this fork is pnpm-only (see packageManager + engines); `pnpm install` runs the root
-    # postinstall (`subpkg run compile calc`), which compiles the patched calc via tsc.
-    # we intentionally don't run `pnpm test` -- upstream's jest suite asserts vanilla @smogon/calc
-    # behavior, which the Showdex damage mods deliberately diverge from, so it can't pass here.
-    # compilation is the meaningful signal that the fork is intact.
-    - run: pnpm install
+    # this fork is pnpm-only (see packageManager + engines). there's no workspace wiring calc/
+    # into the root install, and typescript is a devDependency of the calc subpackage -- so we
+    # install both, with --ignore-scripts to skip lifecycle hooks that don't apply in CI (the
+    # root postinstall & calc's prepare/bundle, the latter a babel pass unrelated to the calc).
+    - run: pnpm install --ignore-scripts
+    - run: pnpm --dir calc install --ignore-scripts
+    # compiling the patched calc is the meaningful smoke test that the fork is intact. we don't
+    # run `pnpm test` -- upstream's jest suite asserts vanilla @smogon/calc behavior that the
+    # Showdex damage mods deliberately diverge from, so it can't pass on this fork.
+    - name: Compile calc
+      run: pnpm --dir calc exec tsc --build --force .
       env:
         CI: true
 
