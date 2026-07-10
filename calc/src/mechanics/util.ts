@@ -35,7 +35,7 @@ export function isGrounded(pokemon: Pokemon, field: Field) {
 }
 
 export function getModifiedStat(stat: number, mod: number, gen?: Generation) {
-  if (gen && gen.num < 3) {
+  if (gen && (gen.num === 1 || gen.num === 2)) {
     if (mod >= 0) {
       const pastGenBoostTable = [1, 1.5, 2, 2.5, 3, 3.5, 4];
       stat = Math.floor(stat * pastGenBoostTable[mod]);
@@ -269,7 +269,7 @@ export function checkDownload(_source: Pokemon, _target: Pokemon, _wonderRoomAct
 export function checkIntrepidSword(_source: Pokemon, _gen: Generation) {
   // handled in Showdex via determineAutoBoostEffect(), so making this a no-op
   /*
-  if (source.hasAbility('Intrepid Sword') && gen.num > 7) {
+  if (source.hasAbility('Intrepid Sword') && (gen.num === 8 || source.abilityOn)) {
     source.boosts.atk = Math.min(6, source.boosts.atk + 1);
   }
   */
@@ -278,7 +278,7 @@ export function checkIntrepidSword(_source: Pokemon, _gen: Generation) {
 export function checkDauntlessShield(_source: Pokemon, _gen: Generation) {
   // handled in Showdex via determineAutoBoostEffect(), so making this a no-op
   /*
-  if (source.hasAbility('Dauntless Shield') && gen.num > 7) {
+  if (source.hasAbility('Dauntless Shield') && (gen.num === 8 || source.abilityOn)) {
     source.boosts.def = Math.min(6, source.boosts.def + 1);
   }
   */
