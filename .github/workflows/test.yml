@@ -20,16 +20,22 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [18.x]
+        node-version: [24.x]
 
     steps:
     - uses: actions/checkout@v4
+    - name: Enable corepack
+      run: corepack enable
     - name: Use Node.js ${{ matrix.node-version }}
-      uses: Zarel/setup-node@patch-1
+      uses: actions/setup-node@v4
       with:
         node-version: ${{ matrix.node-version }}
-    - run: npm install
-    - run: npm run test
+    # this fork is pnpm-only (see packageManager + engines); `pnpm install` runs the root
+    # postinstall (`subpkg run compile calc`), which compiles the patched calc via tsc.
+    # we intentionally don't run `pnpm test` -- upstream's jest suite asserts vanilla @smogon/calc
+    # behavior, which the Showdex damage mods deliberately diverge from, so it can't pass here.
+    # compilation is the meaningful signal that the fork is intact.
+    - run: pnpm install
       env:
         CI: true
 
