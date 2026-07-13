@@ -7,9 +7,9 @@
 <table align="center">
   <thead>
     <tr>
-      <th align="center">&nbsp;Currently <a href="https://github.com/doshidak/showdex-calc/releases/tag/v1.3.0"><s>v1.3.0</s></a>&nbsp;</th>
-      <th align="center">&nbsp;Powering <a href="https://github.com/doshidak/showdex"><code>showdex</code></a> · <a href="https://github.com/doshidak/showdex/releases/tag/v1.3.0"><s>v1.3.0</s></a>&nbsp;</th>
-      <th align="center">&nbsp;Patches <a href="https://github.com/smogon/damage-calc/tree/master/calc"><code>@smogon/calc</code></a> · <a href="https://npmjs.com/package/@smogon/calc/v/0.11.0">v0.11.0</a> &rarr; <a href="https://github.com/doshidak/showdex-calc/commit/36ba50147ef383e131704fe8e07f7adb68e3d966"><code>36ba501</code></a>&nbsp;</th>
+      <th align="center">&nbsp;Currently <a href="https://github.com/doshidak/showdex-calc/releases/tag/v1.4.1">v1.4.1</a>&nbsp;</th>
+      <th align="center">&nbsp;Powering <a href="https://github.com/doshidak/showdex"><code>showdex</code></a> · <a href="https://github.com/doshidak/showdex/releases/tag/v1.4.1">v1.4.1</a>&nbsp;</th>
+      <th align="center">&nbsp;Patches <a href="https://github.com/smogon/damage-calc/tree/master/calc"><code>@smogon/calc</code></a> · <a href="https://npmjs.com/package/@smogon/calc/v/0.11.0">v0.11.0</a> &rarr; <a href="https://github.com/doshidak/showdex-calc/commit/2681f3624c43324d6b22e56c68d294632178304f"><code>2681f36</code></a>&nbsp;</th>
     </tr>
   </thead>
 </table>
