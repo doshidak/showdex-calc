@@ -80,10 +80,10 @@ export class Move extends A.Move {
   constructor(
     gen: I.GenerationNum | I.Generation,
     name: string,
-    options: Partial<Omit<State.Move, 'ability' | 'item' | 'species'>> & {
+    options: Partial<Omit<State.Move, 'ability' | 'item'>> & {
       ability?: string;
       item?: string;
-      species?: string;
+      overrideMove?: string;
     } = {}
   ) {
     super(typeof gen === 'number' ? Generations.get(gen) : gen, name, options as any);
