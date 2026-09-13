@@ -19,6 +19,7 @@ interface DexSet {
   gender?: GenderName;
   item?: ItemName[] | ItemName;
   nature?: NatureName[] | NatureName;
+  isGmax?: boolean;
   teratypes?: TypeName[] | TypeName;
   evs?: Partial<StatsTable>[] | Partial<StatsTable>;
   ivs?: Partial<StatsTable>[] | Partial<StatsTable>;
@@ -47,8 +48,10 @@ interface CalcSet {
   ability?: string;
   item?: string;
   nature?: string;
+  isGmax?: boolean;
   teraType?: string;
   evs?: Partial<CalcStatsTable>;
+  sps?: Partial<CalcStatsTable>;
   ivs?: Partial<CalcStatsTable>;
 }
 
@@ -56,6 +59,9 @@ const VALIDATORS: {[format: string]: TeamValidator} = {};
 // These formats don't exist in @pkmn/sim so we make them bypass
 // the validator which is the only area that needs the Format object
 const UNSUPPORTED: {[format: string]: string} = {
+  'gen9championsou': '[Champions] OU',
+  'gen9championsvgc2026regmb': '[Champions] VGC 2026 Reg M-B',
+  'gen9championsbssregmb': '[Champions] BSS Reg M-B',
   'gen9almostanyability': '[Gen 9] Almost Any Ability',
   'gen9nfe': '[Gen 9] NFE',
   'gen8nfe': '[Gen 8] NFE',
@@ -181,11 +187,11 @@ function getSpecie(gen: Generation, specieName: SpeciesName): Specie | PSSpecie 
 }
 
 function toPSFormat(formatID: ID): ID {
-  if (formatID === 'gen9vgc2025') {
-    return 'gen9vgc2025regi' as ID;
+  if (formatID === 'gen9championsvgc2026') {
+    return 'gen9championsvgc2026regmb' as ID;
   }
-  if (formatID === 'gen9battlestadiumsingles') {
-    return 'gen9bssregj' as ID;
+  if (formatID === 'gen9championsbattlestadiumsingles') {
+    return 'gen9championsbssregmb' as ID;
   }
   return formatID;
 }
@@ -273,15 +279,19 @@ function usageToPset(
   return pset;
 }
 
-function psetToCalcSet(genNum: GenerationNum, pset: PokemonSet): CalcSet {
+function psetToCalcSet(
+  name: string, genNum: GenerationNum, pset: PokemonSet, champions = false
+): CalcSet {
   return {
     level: pset.level === 100 ? undefined : pset.level,
     ability: pset.ability || undefined,
     item: pset.item || undefined,
     nature: !pset.nature || USELESS_NATURES.includes(pset.nature) ? undefined : pset.nature,
+    isGmax: name.endsWith('-Gmax') || undefined,
     teraType: pset.teraType || undefined,
     ivs: toCalcStatsTable(pset.ivs, genNum === 2 ? 30 : 31),
-    evs: toCalcStatsTable(pset.evs, genNum > 2 ? 0 : 252),
+    evs: champions ? undefined : toCalcStatsTable(pset.evs, genNum > 2 ? 0 : 252),
+    sps: champions ? toCalcStatsTable(pset.evs, 0) : undefined,
     moves: pset.moves,
   };
 }
@@ -430,8 +440,8 @@ function similarFormes(
   return similar;
 }
 
-async function fetchDexSets(genNum: GenerationNum): Promise<DexSets> {
-  const url = `https://data.pkmn.cc/sets/gen${genNum}.json`;
+async function fetchDexSets(gen: GenerationNum | 'champions'): Promise<DexSets> {
+  const url = `https://data.pkmn.cc/sets/${gen === 'champions' ? '' : 'gen'}${gen}.json`;
   console.log(`Fetching ${url}...`);
   const resp = await fetch(url);
   if (resp.status === 404) return {};
@@ -445,17 +455,19 @@ async function fetchStats(formatID: ID): Promise<DisplayStatistics | false> {
   if (resp.status === 404) return false;
   return resp.json();
 }
+
 async function importGen(
-  gen: Generation
+  gen: Generation,
+  champions = false
 ): Promise<{[specie: string]: {[name: string]: CalcSet}}> {
   const calcSets: {[specie: string]: {[name: string]: CalcSet}} = {};
-  const dexSets = await fetchDexSets(gen.num);
+  const dexSets = await fetchDexSets(champions ? 'champions' : gen.num);
   const formatIDs = new Set<ID>();
   const statsIgnore: {[specie: string]: Set<ID>} = {};
   for (const [specieName, formats] of Object.entries(dexSets)) {
     for (let [formatID, sets] of Object.entries(formats).sort((a, b) =>
       getTierRanking(a[0]) - getTierRanking(b[0])) as unknown as [ID, DexSet][]) {
-      formatID = `gen${gen.num}${formatID}` as ID;
+      formatID = `gen${gen.num}${champions ? 'champions' : ''}${formatID}` as ID;
       const psFormat = toPSFormat(formatID);
       const format = UNSUPPORTED[psFormat] ? null : Dex.formats.get(psFormat);
       if (format && !format.exists) {
@@ -467,10 +479,15 @@ async function importGen(
       for (const [name, set] of Object.entries(sets)) {
         const pset = dexToPset(gen, formatID, specie, set);
         if (format && !validatePSet(format, pset, 'dex')) continue;
-        const calcSet = psetToCalcSet(gen.num, pset);
-        const setName = `${formatName.slice(formatName.indexOf(']') + 2)} ${name}`;
-        if (!calcSets[specieName]) calcSets[specieName] = {};
-        calcSets[specieName][setName] = calcSet;
+        const calcSet = psetToCalcSet(specieName, gen.num, pset, champions);
+        let setName = `${formatName.slice(formatName.indexOf(']') + 2)} ${name}`;
+        if (calcSet.isGmax &&
+        !['Gigantamax', 'G-Max', 'Gmax', 'gmax'].some(j => setName.includes(j))) {
+          setName += ' (G-Max)';
+        }
+        const toSpecies = calcSet.isGmax ? pset.species : specieName;
+        if (!calcSets[toSpecies]) calcSets[toSpecies] = {};
+        calcSets[toSpecies][setName] = calcSet;
         if (!statsIgnore[specieName]) statsIgnore[specieName] = new Set();
         statsIgnore[specieName].add(formatID);
         const item = gen.items.get(pset.item) ?? ModdedDex.forGen(gen.num).items.get(pset.item);
@@ -517,7 +534,7 @@ async function importGen(
       const specie = getSpecie(gen, specieName);
       const pset = usageToPset(gen, formatID, specie.name, uset);
       if (format && !validatePSet(format, pset, 'stats')) continue;
-      const calcSet = psetToCalcSet(gen.num, pset);
+      const calcSet = psetToCalcSet(specieName, gen.num, pset, champions);
       if (!calcSets[specieName]) calcSets[specieName] = {};
       const setName = `${formatName.slice(formatName.indexOf(']') + 2)} Showdown Usage`;
       calcSets[specieName][setName] = calcSet;
@@ -568,10 +585,10 @@ function stringifyCalcSets(calcSets: {[specie: string]: {[name: string]: CalcSet
     console.log(`${outDir} is not a directory`);
     process.exit(1);
   }
-  const genNames = ['RBY', 'GSC', 'ADV', 'DPP', 'BW', 'XY', 'SM', 'SS', 'SV'];
+  const genNames = ['CHAMPIONS', 'RBY', 'GSC', 'ADV', 'DPP', 'BW', 'XY', 'SM', 'SS', 'SV'];
   for (const [i, genName] of genNames.entries()) {
-    const calcSets = await importGen(gens.get(i + 1));
-    const path = `${outDir}/gen${i + 1}.js`;
+    const calcSets = await importGen(i === 0 ? gens.get(9) : gens.get(i), i === 0);
+    const path = i === 0 ? `${outDir}/champions.js` : `${outDir}/gen${i}.js`;
     console.log(`Writing ${path}...`);
     fs.writeFileSync(
       path, `var SETDEX_${genName} = {\n${stringifyCalcSets(calcSets)}\n};\n`

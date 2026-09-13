@@ -3,10 +3,10 @@
   "repository": "github:smogon/damage-calc",
   "license": "MIT",
   "dependencies": {
-    "@pkmn/data": "^0.10.9",
-    "@pkmn/dex": "^0.10.9",
-    "@pkmn/sim": "^0.10.9",
-    "@pkmn/smogon": "^0.5.30"
+    "@pkmn/data": "^0.10.11",
+    "@pkmn/dex": "^0.10.11",
+    "@pkmn/sim": "^0.10.11",
+    "@pkmn/smogon": "^0.6.0"
   },
   "devDependencies": {
     "@pkmn/eslint-config": "^8.4.0",

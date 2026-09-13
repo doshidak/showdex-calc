@@ -20,7 +20,7 @@
 //   - items.js
 //
 //   - mechanics/util.js
-//   - mechanics/gen78.js
+//   - mechanics/gen789.js
 //   - mechanics/gen56.js
 //   - mechanics/gen4.js
 //   - mechanics/gen3.js
@@ -28,7 +28,7 @@
 //
 //   - calc.js
 //   - desc.js
-//   - result.ts
+//   - result.js
 //
 //   - adaptable.js
 //   - index.js
@@ -80,10 +80,10 @@ export class Move extends A.Move {
   constructor(
     gen: I.GenerationNum | I.Generation,
     name: string,
-    options: Partial<Omit<State.Move, 'ability' | 'item' | 'species'>> & {
+    options: Partial<Omit<State.Move, 'ability' | 'item'>> & {
       ability?: string;
       item?: string;
-      species?: string;
+      overrideMove?: string;
     } = {}
   ) {
     super(typeof gen === 'number' ? Generations.get(gen) : gen, name, options as any);

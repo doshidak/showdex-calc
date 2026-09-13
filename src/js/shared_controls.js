@@ -274,7 +274,7 @@ $(".ability").bind("keyup change", function () {
 
 	var TOGGLE_ABILITIES = {
 		on: ['Intimidate', 'Slow Start', 'Teraform Zero'],
-		off: ['Flash Fire', 'Minus', 'Plus', 'Unburden', 'Analytic', 'Stakeout'],
+		off: ['Flash Fire', 'Minus', 'Plus', 'Unburden', 'Analytic', 'Stakeout', 'Electromorphosis'],
 	};
 
 	if (gen !== 8) {
@@ -373,7 +373,7 @@ function autosetWeather(ability, i) {
 		$("#sand").prop("checked", true);
 		break;
 	case "Snow Warning":
-		if (gen >= 9) {
+		if (gen === 0 || gen >= 9) {
 			lastAutoWeather[i] = "Snow";
 			$("#snow").prop("checked", true);
 		} else {
@@ -461,7 +461,6 @@ $(".teraType").change(function () {
 	stellarButtonsVisibility(pokeObj, $(this).val() === "Stellar" && checked);
 });
 
-var lockerMove = "";
 // auto-update move details on select
 $(".move-selector").change(function () {
 	var moveName = $(this).val();
@@ -641,7 +640,13 @@ $(".set-selector").change(function () {
 				// The Gens 8 and 9 randdex contains information for multiple Random Battles formats for each Pokemon.
 				// Duraludon, for example, has data for Randoms, Doubles Randoms, and Baby Randoms.
 				// Therefore, the information for only the format chosen should be used.
-				randset = randdex[pokemonName][setName];
+				if (setName.endsWith("-Gmax")) {
+					setName = setName.slice(0, -5);
+					randset = randdex[pokemonName + "-Gmax"][setName];
+					randset.isGmax = true;
+				} else {
+					randset = randdex[pokemonName][setName];
+				}
 			} else {
 				randset = randdex[pokemonName];
 			}
@@ -687,6 +692,7 @@ $(".set-selector").change(function () {
 			if (regSets) {
 				pokeObj.find(".teraType").val(set.teraType || getForcedTeraType(pokemonName) || pokemon.types[0]);
 			}
+			pokeObj.find(".gmaxToggle").prop("checked", pokemon.canGigantamax && set.isGmax || false);
 			pokeObj.find(".level").val(set.level === undefined ? 100 : set.level);
 			var evsDefault = gen < 3 ? 252 : ($("#randoms").prop("checked") ? 84 : 0);
 			for (i = 0; i < LEGACY_STATS[gen].length; i++) {
@@ -743,6 +749,7 @@ $(".set-selector").change(function () {
 			}
 		} else {
 			pokeObj.find(".teraType").val(getForcedTeraType(pokemonName) || pokemon.types[0]);
+			pokeObj.find(".gmaxToggle").prop("checked", false);
 			pokeObj.find(".level").val(defaultLevel);
 			pokeObj.find(".hp .sps").val(0);
 			pokeObj.find(".hp .evs").val(gen > 2 ? 0 : 252);
@@ -792,6 +799,11 @@ $(".set-selector").change(function () {
 			showFormes(formeObj, pokemonName, baseForme, pokemon.baseSpecies);
 		} else {
 			formeObj.hide();
+		}
+		if (gen === 8 && pokemon.canGigantamax) {
+			pokeObj.find(".gmaxToggle").parent().show();
+		} else {
+			pokeObj.find(".gmaxToggle").parent().hide();
 		}
 		calcStats(pokeObj);
 		var total = pokeObj.find(".hp").find(".total").text();
@@ -1049,7 +1061,7 @@ function createPokemon(pokeInfo) {
 		var setName = pokeInfo.substring(pokeInfo.indexOf("(") + 1, pokeInfo.lastIndexOf(")"));
 		var isRandoms = $("#randoms").prop("checked");
 		var isChampions = $("#champions").prop("checked");
-		var set = isRandoms ? randdex[name] : setdex[name][setName];
+		var set = isRandoms ? setName.endswith("-Gmax") ? randdex[name + "-Gmax"] : randdex[name] : setdex[name][setName];
 
 		var ivs = {};
 		var evs = {};
@@ -1136,6 +1148,11 @@ function createPokemon(pokeInfo) {
 		var item = pokeInfo.find(".item").val();
 		var gender = pokeInfo.find(".gender").val();
 		var isDynamaxed = pokeInfo.find(".max").prop("checked");
+		var overrideMove;
+		if (isDynamaxed && pokeInfo.find(".gmaxToggle").prop("checked")) {
+			isDynamaxed = 'gmax';
+			overrideMove = species.canGigantamax;
+		}
 		var teraType = pokeInfo.find(".teraToggle").is(":checked") ? pokeInfo.find(".teraType").val() : undefined;
 		var opts = {
 			ability: ability,
@@ -1143,13 +1160,13 @@ function createPokemon(pokeInfo) {
 			gender: gender,
 			isDynamaxed: isDynamaxed,
 			teraType: teraType,
-			species: name,
+			overrideMove: overrideMove,
 		};
 		pokeInfo.isDynamaxed = isDynamaxed;
 		calcHP(pokeInfo);
 		var curHP = ~~pokeInfo.find(".current-hp").val();
 		// FIXME the Pokemon constructor expects non-dynamaxed HP
-		if (isDynamaxed) curHP = Math.floor(curHP / 2);
+		if (pokeInfo.isDynamaxed) curHP = Math.floor(curHP / 2);
 		var types = [pokeInfo.find(".type1").val(), pokeInfo.find(".type2").val()];
 		return new calc.Pokemon(gen, name, {
 			level: ~~pokeInfo.find(".level").val(),
@@ -1160,10 +1177,11 @@ function createPokemon(pokeInfo) {
 			nature: pokeInfo.find(".nature").val(),
 			ivs: ivs,
 			evs: evs,
-			isDynamaxed: isDynamaxed,
 			alliesFainted: parseInt(pokeInfo.find(".alliesFainted").val()),
 			boostedStat: pokeInfo.find(".boostedStat").val() || undefined,
 			teraType: teraType,
+			isDynamaxed: isDynamaxed,
+			overrideMove: overrideMove,
 			boosts: boosts,
 			curHP: curHP,
 			status: CALC_STATUS[pokeInfo.find(".status").val()],
@@ -1232,9 +1250,9 @@ function getMoveDetails(moveInfo, opts) {
 	}
 	if (gen >= 4) overrides.category = moveInfo.find(".move-cat").val();
 	return new calc.Move(gen, moveName, {
-		ability: opts.ability, item: opts.item, useZ: isZMove, species: opts.species, isCrit: isCrit, hits: hits,
-		isStellarFirstUse: isStellarFirstUse, timesUsed: timesUsed, timesUsedWithMetronome: timesUsedWithMetronome,
-		overrides: overrides, useMax: opts.isDynamaxed
+		ability: opts.ability, item: opts.item, useZ: isZMove, useMax: opts.isDynamaxed, overrideMove: opts.overrideMove,
+		isCrit: isCrit, hits: hits, timesUsed: timesUsed, timesUsedWithMetronome: timesUsedWithMetronome,
+		isStellarFirstUse: isStellarFirstUse, overrides: overrides
 	});
 }
 
@@ -1267,8 +1285,10 @@ function createField() {
 	var isLightScreen = [$("#lightScreenL").prop("checked"), $("#lightScreenR").prop("checked")];
 	var isProtected = [$("#protectL").prop("checked"), $("#protectR").prop("checked")];
 	var isSeeded = [$("#leechSeedL").prop("checked"), $("#leechSeedR").prop("checked")];
+	var isNightmared = [$("#nightmareL").prop("checked"), $("#nightmareR").prop("checked")];
 	var isSaltCured = [$("#saltCureL").prop("checked"), $("#saltCureR").prop("checked")];
 	var isForesight = [$("#foresightL").prop("checked"), $("#foresightR").prop("checked")];
+	var isCharge = [$("#chargeL").prop("checked"), $("#chargeR").prop("checked")];
 	var isHelpingHand = [$("#helpingHandL").prop("checked"), $("#helpingHandR").prop("checked")];
 	var isTailwind = [$("#tailwindL").prop("checked"), $("#tailwindR").prop("checked")];
 	var isFlowerGift = [$("#flowerGiftL").prop("checked"), $("#flowerGiftR").prop("checked")];
@@ -1294,8 +1314,10 @@ function createField() {
 			isLightScreen: isLightScreen[i],
 			isProtected: isProtected[i],
 			isSeeded: isSeeded[i],
+			isNightmared: isNightmared[i],
 			isSaltCured: isSaltCured[i],
 			isForesight: isForesight[i],
+			isCharge: isCharge[i],
 			isTailwind: isTailwind[i],
 			isHelpingHand: isHelpingHand[i],
 			isFlowerGift: isFlowerGift[i],
@@ -1621,30 +1643,8 @@ function getSetOptions(sets) {
 			text: pokeName
 		});
 		if ($("#randoms").prop("checked")) {
-			if (pokeName in randdex) {
-				if (gen >= 8) {
-					// The Gen 8 and 9 randdex contains information for multiple Random Battles formats for each Pokemon.
-					// Duraludon, for example, has data for Randoms, Doubles Randoms, and Baby Randoms.
-					// Therefore, all of this information has to be populated within the set options.
-					var randTypes = Object.keys(randdex[pokeName]);
-					for (var j = 0; j < randTypes.length; j++) {
-						var rand = randTypes[j];
-						setOptions.push({
-							pokemon: pokeName + (rand === "Randoms" ? "" : " (" + rand.split(' ')[0] + ")"),
-							set: rand + ' Set',
-							text: pokeName + " (" + rand + ")",
-							id: pokeName + " (" + rand + ")"
-						});
-					}
-				} else {
-					setOptions.push({
-						pokemon: pokeName,
-						set: 'Randoms Set',
-						text: pokeName + " (Randoms)",
-						id: pokeName + " (Randoms)"
-					});
-				}
-			}
+			if (pokeName in randdex) loadRandset(pokeName, setOptions, "");
+			if ((pokeName + "-Gmax") in randdex) loadRandset(pokeName, setOptions, "Gmax");
 		} else {
 			if (pokeName in setdex) {
 				var setNames = Object.keys(setdex[pokeName]);
@@ -1669,6 +1669,33 @@ function getSetOptions(sets) {
 		}
 	}
 	return setOptions;
+}
+
+function loadRandset(pokeName, setOptions, isGmax) {
+	if (gen >= 8) {
+		// The Gen 8 and 9 randdex contains information for multiple Random Battles formats for each Pokemon.
+		// Duraludon, for example, has data for Randoms, Doubles Randoms, and Baby Randoms.
+		// Therefore, all of this information has to be populated within the set options.
+		var baseName = pokeName;
+		if (isGmax) pokeName = pokeName + "-Gmax";
+		var randTypes = Object.keys(randdex[pokeName]);
+		for (var j = 0; j < randTypes.length; j++) {
+			var rand = randTypes[j];
+			setOptions.push({
+				pokemon: pokeName + (rand === "Randoms" ? "" : " (" + rand.split(' ')[0] + ")"),
+				set: isGmax + rand + " Set",
+				text: pokeName + " (" + rand + ")",
+				id: baseName + " (" + rand + (isGmax ? "-Gmax)" : ")")
+			});
+		}
+	} else {
+		setOptions.push({
+			pokemon: pokeName,
+			set: "Randoms Set",
+			text: pokeName + " (Randoms)",
+			id: pokeName + " (Randoms)"
+		});
+	}
 }
 
 function getSelectOptions(arr, sort, defaultOption) {
