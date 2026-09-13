@@ -6,6 +6,7 @@ export namespace State {
     level?: number;
     ability?: I.AbilityName;
     abilityOn?: boolean;
+    extraAbilities?: I.AbilityName[];
     isDynamaxed?: boolean | 'gmax';
     dynamaxLevel?: number;
     alliesFainted?: number;

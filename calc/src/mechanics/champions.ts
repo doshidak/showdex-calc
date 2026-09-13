@@ -131,6 +131,7 @@ export function calculateChampions(
   if (defenderAbilityIgnored && attackerIgnoresAbility) {
     if (attackerIgnoresAbility) desc.attackerAbility = attacker.ability;
     defender.ability = '' as AbilityName;
+    defender.extraAbilities = [];
   }
 
   // Merciless does not ignore Shell Armor, damage dealt to a poisoned Pokemon with Shell Armor

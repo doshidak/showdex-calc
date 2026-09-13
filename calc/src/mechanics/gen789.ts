@@ -201,6 +201,7 @@ export function calculateSMSSSV(
       desc.defenderItem = defender.item;
     } else {
       defender.ability = '' as AbilityName;
+      defender.extraAbilities = [];
     }
   }
 
@@ -218,6 +219,7 @@ export function calculateSMSSSV(
       desc.defenderItem = defender.item;
     } else {
       defender.ability = '' as AbilityName;
+      defender.extraAbilities = [];
     }
   }
 
@@ -228,6 +230,7 @@ export function calculateSMSSSV(
       desc.attackerItem = attacker.item;
     } else {
       attacker.ability = '' as AbilityName;
+      attacker.extraAbilities = [];
     }
   }
 
