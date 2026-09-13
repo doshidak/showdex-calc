@@ -125,6 +125,10 @@
                             <select class="gender calc-trigger"><option value="">(Select)</option><option value="M">Male</option><option value="F">Female</option><option value="N">Genderless</option></select>
                         </div>
                         <div>
+                            <label>G-Max</label>
+                            <input type="checkbox" title= "Does this Pok&eacute;mon have the Gigantamax Factor?" class="gmaxToggle calc-trigger">
+                        </div>
+                        <div>
                             <label>Level</label>
                             <!--
                             We use inputmode="decimal" so that mobile devices will have a numpad appear when inputting values.
@@ -143,7 +147,7 @@
                                 <th></th>
                                 <th>Base</th>
                                 <th class="gen-specific g3 g4 g5 g6 g7 g8 g9">IVs</th>
-                                <th class="gen-specific g3 g4 g5 g6 g7 g8 g9">EVs</th>
+                                <th>EVs</th>
                                 <th class="gen-specific g1 g2 hide">DVs</th>
                                 <th></th>
                                 <th></th>
@@ -158,7 +162,7 @@
                                 <td class="gen-specific g3 g4 g5 g6 g7 g8 g9">
                                     <input class="ivs" value="31" inputmode="decimal" />
                                 </td>
-                                <td class="gen-specific g3 g4 g5 g6 g7 g8 g9">
+                                <td>
                                     <input class="evs" type="number" min="0" max="252" step="4" value="0" inputmode="decimal" />
                                 </td>
                                 <td class="gen-specific g1 g2 hide">
@@ -178,7 +182,7 @@
                                 <td class="gen-specific g3 g4 g5 g6 g7 g8 g9">
                                     <input class="ivs" value="31" inputmode="decimal" />
                                 </td>
-                                <td class="gen-specific g3 g4 g5 g6 g7 g8 g9">
+                                <td>
                                     <input class="evs" type="number" min="0" max="252" step="4" value="0" inputmode="decimal" />
                                 </td>
                                 <td class="gen-specific g1 g2 hide">
@@ -214,7 +218,7 @@
                                 <td class="gen-specific g3 g4 g5 g6 g7 g8 g9">
                                     <input class="ivs" value="31" inputmode="decimal" />
                                 </td>
-                                <td class="gen-specific g3 g4 g5 g6 g7 g8 g9">
+                                <td>
                                     <input class="evs" type="number" min="0" max="252" step="4" value="0" inputmode="decimal" />
                                 </td>
                                 <td class="gen-specific g1 g2 hide">
@@ -250,7 +254,7 @@
                                 <td class="gen-specific g3 g4 g5 g6 g7 g8 g9">
                                     <input class="ivs" value="31" inputmode="decimal" />
                                 </td>
-                                <td class="gen-specific g3 g4 g5 g6 g7 g8 g9">
+                                <td>
                                     <input class="evs" type="number" min="0" max="252" step="4" value="0" inputmode="decimal" />
                                 </td>
                                 <td class="gen-specific g1 g2 hide">
@@ -286,7 +290,7 @@
                                 <td class="gen-specific g3 g4 g5 g6 g7 g8 g9">
                                     <input class="ivs" value="31" inputmode="decimal" />
                                 </td>
-                                <td class="gen-specific g3 g4 g5 g6 g7 g8 g9">
+                                <td>
                                     <input class="evs" type="number" min="0" max="252" step="4" value="0" inputmode="decimal" />
                                 </td>
                                 <td class="gen-specific g1 g2 hide">
@@ -318,6 +322,9 @@
                                 </td>
                                 <td>
                                     <input class="base" value="100" inputmode="decimal" />
+                                </td>
+                                <td>
+                                    <input class="evs calc-trigger" type="number" min="0" max="252" step="4" value="0" inputmode="decimal" />
                                 </td>
                                 <td>
                                     <input class="dvs" value="15" inputmode="decimal" />
@@ -352,7 +359,7 @@
                                 <td class="gen-specific g3 g4 g5 g6 g7 g8 g9">
                                     <input class="ivs" value="31" inputmode="decimal" />
                                 </td>
-                                <td class="gen-specific g3 g4 g5 g6 g7 g8 g9">
+                                <td>
                                     <input class="evs" type="number" min="0" max="252" step="4" value="0" inputmode="decimal" />
                                 </td>
                                 <td class="gen-specific g1 g2 hide">
@@ -386,7 +393,7 @@
                                 </th>
                                 <td></td>
                                 <td></td>
-                                <td class="gen-specific g3 g4 g5 g6 g7 g8 g9">
+                                <td>
                                     <span class="evs calc-trigger">0</span>
                                 </td>
                             </tr>
@@ -483,7 +490,8 @@
                         <label>Current HP</label>
                         <input class="current-hp" value="341" />/<span class="max-hp">341</span> (
                         <input class="percent-hp" value="100" />%)
-						 <input class="max calc-trigger btn-input" type="checkbox" id="maxL" /><label class="btn btn-wide gen-specific g8 g9" for="maxL" title="Use the corresponding Max Move?">Dynamax</label>
+                        <input class="visually-hidden max calc-trigger btn-input" type="checkbox" id="maxL" />
+                        <label class="btn max-btn gen-specific g8 g9" for="maxL" title="Use the corresponding Max Move?">Dynamax</label>
                         <br />
                         <br />
                         Health <div class="hpbar"></div>
@@ -821,6 +829,16 @@
                             <label class="btn btn-wide" for="leechSeedR">Leech Seed</label>
                         </div>
                     </div>
+                    <div class="btn-group gen-specific g2 g3 g4 g5 g6 g7 g8 g9">
+                        <div class="left" title="Has this Pok&eacute;mon been affected by Nightmare?">
+                            <input class="visually-hidden" type="checkbox" id="nightmareL" />
+                            <label class="btn btn-wide" for="nightmareL">Nightmare</label>
+                        </div>
+                        <div class="right" title="Has this Pok&eacute;mon been affected by Nightmare?">
+                            <input class="visually-hidden" type="checkbox" id="nightmareR" />
+                            <label class="btn btn-wide" for="nightmareR">Nightmare</label>
+                        </div>
+                    </div>
                     <div class="btn-group gen-specific g9">
                         <div class="left" title="Has this Pok&eacute;mon been affected by Salt Cure?">
                             <input class="visually-hidden" type="checkbox" id="saltCureL" />
@@ -841,6 +859,17 @@
                             <label class="btn btn-wide" for="foresightR">Foresight</label>
                         </div>
                     </div>
+                    <tr class="gen-specific g3 g4 g5 g6 g7 g8 g9">
+                        <td><div class="left" title="Has this Pok&eacute;mon powered up with Charge?">
+                            <div hidden id="selectRevealInstruction">Has this Pok&eacute;mon powered up with Charge?</div>
+                            <input aria-describedby="selectRevealInstruction" class="visually-hidden calc-trigger" type="checkbox" id="chargeL" />
+                            <label class="btn btn-wide" for="chargeL">Charge</label>
+                        </div></td>
+                        <td><div class="right" title="Has this Pok&eacute;mon powered up with Charge?">
+                            <input aria-describedby="selectRevealInstruction" class="visually-hidden calc-trigger" type="checkbox" id="chargeR" />
+                            <label class="btn btn-wide" for="chargeR">Charge</label>
+                        </div></td>
+                    </tr>
                     <div class="btn-group gen-specific g3 g4 g5 g6 g7 g8 g9">
                         <div class="left" title="Has this Pok&eacute;mon's power been boosted by an ally's Helping Hand?">
                             <input class="visually-hidden" type="checkbox" id="helpingHandL" />

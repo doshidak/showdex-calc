@@ -330,7 +330,6 @@ var SETDEX_DPP = {
     "LC Trick Room Attacker": {"level":5,"ability":"Huge Power","item":"Life Orb","nature":"Brave","evs":{"hp":116,"at":196,"df":36,"sd":116},"moves":["Return","Waterfall","Iron Tail","Substitute"]}
   },
   "Mawile": {
-    "ZU Baton Pass": {"ability":"Intimidate","item":"Leftovers","nature":"Impish","evs":{"hp":252,"at":4,"df":252},"moves":["Swords Dance","Iron Head","Sucker Punch","Baton Pass"]},
     "ZU Swords Dance": {"ability":"Intimidate","item":"Life Orb","nature":"Adamant","evs":{"at":252,"df":4,"sp":252},"moves":["Swords Dance","Iron Head","Brick Break","Sucker Punch"]}
   },
   "Plusle": {
@@ -582,7 +581,6 @@ var SETDEX_DPP = {
     "UU Trick Room": {"ability":"Levitate","item":"Leftovers","nature":"Brave","ivs":{"sp":0},"evs":{"hp":252,"at":252,"sd":4},"moves":["Trick Room","Explosion","Stealth Rock","Psychic"]},
     "ZU Calm Mind": {"ability":"Levitate","item":"Leftovers","nature":"Timid","ivs":{"at":0},"evs":{"sa":252,"sd":4,"sp":252},"moves":["Calm Mind","Psychic","Earth Power","Substitute"]},
     "ZU Stealth Rock": {"ability":"Levitate","item":"Life Orb","nature":"Timid","ivs":{"at":0},"evs":{"sa":252,"sd":4,"sp":252},"moves":["Stealth Rock","Psychic","Earth Power","Signal Beam"]},
-    "ZU Rock Polish": {"ability":"Levitate","item":"Life Orb","nature":"Modest","ivs":{"at":0},"evs":{"sa":252,"sd":4,"sp":252},"moves":["Rock Polish","Psychic","Earth Power","Baton Pass"]},
     "ZU Choice Scarf": {"ability":"Levitate","item":"Choice Scarf","nature":"Timid","evs":{"sa":252,"sd":4,"sp":252},"moves":["Psychic","Earth Power","Grass Knot","Explosion"]},
     "PU Showdown Usage": {"ability":"Levitate","item":"Leftovers","nature":"Modest","evs":{"hp":252,"sa":252,"sd":4},"moves":["Psychic","Grass Knot","Ice Beam","Calm Mind"]}
   },
@@ -763,9 +761,6 @@ var SETDEX_DPP = {
   },
   "Leafeon": {
     "UU Swords Dance": {"ability":"Leaf Guard","item":"Life Orb","nature":"Jolly","evs":{"at":252,"df":4,"sp":252},"moves":["Swords Dance","Leaf Blade","Double-Edge","Synthesis"]}
-  },
-  "Glaceon": {
-    "PU BRRRR (Choice Specs)": {"ability":"Snow Cloak","item":"Choice Specs","nature":"Timid","ivs":{"at":3,"sa":30,"sd":30},"evs":{"hp":40,"sa":252,"sd":4,"sp":212},"moves":["Ice Beam","Shadow Ball","Hidden Power Ground","Baton Pass"]}
   },
   "Gallade": {
     "OU Attacking Lead": {"ability":"Steadfast","item":"Lum Berry","nature":"Jolly","evs":{"at":252,"df":4,"sp":252},"moves":["Close Combat","Will-O-Wisp","Taunt","Ice Punch"]}
@@ -1368,10 +1363,8 @@ var SETDEX_DPP = {
     "UU All-Out Attacker": {"ability":"Inner Focus","item":"Life Orb","nature":"Naive","ivs":{"df":30,"sa":30,"sd":30,"sp":30},"evs":{"at":4,"sa":252,"sp":252},"moves":["Psychic","Thunderbolt","Sucker Punch","Hidden Power Fighting"]},
     "ZU Mixed Attacker": {"ability":"Inner Focus","item":"Life Orb","nature":"Naive","evs":{"at":4,"sa":252,"sp":252},"moves":["Psychic","Earthquake","Signal Beam","Sucker Punch"]},
     "ZU Calm Mind": {"ability":"Inner Focus","item":"Life Orb","nature":"Timid","ivs":{"at":3,"df":30,"sa":30,"sd":30,"sp":30},"evs":{"sa":252,"sd":4,"sp":252},"moves":["Calm Mind","Psychic","Hidden Power Fighting","Signal Beam"]},
-    "ZU Baton Pass": {"ability":"Inner Focus","item":"Leftovers","nature":"Timid","ivs":{"at":3,"df":30,"sa":30,"sd":30,"sp":30},"evs":{"sa":252,"sd":4,"sp":252},"moves":["Calm Mind","Psychic","Hidden Power Fighting","Baton Pass"]},
     "ZU Choice Scarf": {"ability":"Inner Focus","item":"Choice Scarf","nature":"Timid","ivs":{"at":3,"df":30,"sa":30,"sd":30,"sp":30},"evs":{"sa":252,"sd":4,"sp":252},"moves":["Psychic","Hidden Power Fighting","Signal Beam","Trick"]},
-    "ZU Physically Offensive": {"ability":"Inner Focus","item":"Life Orb","nature":"Jolly","evs":{"at":252,"sd":4,"sp":252},"moves":["Zen Headbutt","Earthquake","Crunch","Sucker Punch"]},
-    "PU Showdown Usage": {"ability":"Inner Focus","item":"Light Clay","nature":"Bold","evs":{"hp":248,"df":136,"sd":124},"moves":["Baton Pass","Agility","Light Screen","Reflect"]}
+    "ZU Physically Offensive": {"ability":"Inner Focus","item":"Life Orb","nature":"Jolly","evs":{"at":252,"sd":4,"sp":252},"moves":["Zen Headbutt","Earthquake","Crunch","Sucker Punch"]}
   },
   "Pineco": {
     "LC Support": {"level":5,"ability":"Sturdy","item":"Oran Berry","nature":"Impish","evs":{"hp":196,"at":76,"df":196},"moves":["Spikes","Rapid Spin","Bug Bite","Payback"]},
@@ -1641,8 +1634,7 @@ var SETDEX_DPP = {
     "Ubers Swords Dance + Baton Pass": {"ability":"Speed Boost","item":"Focus Sash","nature":"Jolly","evs":{"at":252,"df":4,"sp":252},"moves":["Swords Dance","Baton Pass","Protect","X-Scissor"]}
   },
   "Shedinja": {
-    "UU Swords Dance": {"ability":"Wonder Guard","item":"Focus Sash","nature":"Adamant","evs":{"at":252,"sp":252},"moves":["Swords Dance","Will-O-Wisp","Shadow Sneak","X-Scissor"]},
-    "PU Showdown Usage": {"ability":"Wonder Guard","item":"Focus Sash","nature":"Adamant","evs":{"at":252},"moves":["Toxic","Baton Pass","Protect","Secret Power"]}
+    "UU Swords Dance": {"ability":"Wonder Guard","item":"Focus Sash","nature":"Adamant","evs":{"at":252,"sp":252},"moves":["Swords Dance","Will-O-Wisp","Shadow Sneak","X-Scissor"]}
   },
   "Whismur": {
     "LC Trick Room Mixed Attacker": {"level":5,"ability":"Soundproof","item":"Life Orb","nature":"Brave","evs":{"hp":4,"at":188,"df":92,"sa":188,"sd":12},"moves":["Return","Thunder Punch","Ice Beam","Shadow Ball"]}
