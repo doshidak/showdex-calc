@@ -87,6 +87,7 @@ export function calculateDPP(
 
   if (attacker.hasAbility('Mold Breaker') && defenderAbilityIgnored) {
     defender.ability = '' as AbilityName;
+    defender.extraAbilities = [];
     desc.attackerAbility = attacker.ability;
   }
 

@@ -118,6 +118,7 @@ export function calculateBWXY(
 
   if (attacker.hasAbility('Mold Breaker', 'Teravolt', 'Turboblaze') && defenderAbilityIgnored) {
     defender.ability = '' as AbilityName;
+    defender.extraAbilities = [];
     desc.attackerAbility = attacker.ability;
   }
 

@@ -19,6 +19,7 @@ export class Pokemon implements State.Pokemon {
   gender?: I.GenderName;
   ability?: I.AbilityName;
   abilityOn?: boolean;
+  extraAbilities: I.AbilityName[];
   isDynamaxed?: boolean | 'gmax';
   dynamaxLevel?: number;
   alliesFainted?: number;
@@ -61,6 +62,7 @@ export class Pokemon implements State.Pokemon {
     this.gender = options.gender || this.species.gender || 'M';
     this.ability = options.ability || this.species.abilities?.[0] || undefined;
     this.abilityOn = !!options.abilityOn;
+    this.extraAbilities = options.extraAbilities ? [...options.extraAbilities] : [];
 
     this.isDynamaxed = options.isDynamaxed;
     this.dynamaxLevel = this.isDynamaxed
@@ -123,7 +125,10 @@ export class Pokemon implements State.Pokemon {
   }
 
   hasAbility(...abilities: string[]) {
-    return !!(this.ability && abilities.includes(this.ability));
+    return !!(
+      (this.ability && abilities.includes(this.ability)) ||
+      this.extraAbilities?.some((ability) => abilities.includes(ability))
+    );
   }
 
   hasItem(...items: string[]) {
@@ -161,6 +166,7 @@ export class Pokemon implements State.Pokemon {
       level: this.level,
       ability: this.ability,
       abilityOn: this.abilityOn,
+      extraAbilities: this.extraAbilities?.slice(),
       isDynamaxed: this.isDynamaxed,
       dynamaxLevel: this.dynamaxLevel,
       alliesFainted: this.alliesFainted,

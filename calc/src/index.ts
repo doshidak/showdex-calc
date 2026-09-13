@@ -94,8 +94,9 @@ export class Pokemon extends A.Pokemon {
   constructor(
     gen: I.GenerationNum | I.Generation,
     name: string,
-    options: Partial<Omit<State.Pokemon, 'ability' | 'item' | 'nature' | 'moves'>> & {
+    options: Partial<Omit<State.Pokemon, 'ability' | 'extraAbilities' | 'item' | 'nature' | 'moves'>> & {
       ability?: string;
+      extraAbilities?: string[];
       item?: string;
       nature?: string;
       moves?: string[];
