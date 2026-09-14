@@ -7,8 +7,8 @@
 <table align="center">
   <thead>
     <tr>
-      <th align="center">&nbsp;Currently <a href="https://github.com/doshidak/showdex-calc/releases/tag/v1.4.1">v1.4.1</a>&nbsp;</th>
-      <th align="center">&nbsp;Powering <a href="https://github.com/doshidak/showdex"><code>showdex</code></a> · <a href="https://github.com/doshidak/showdex/releases/tag/v1.4.1">v1.4.1</a>&nbsp;</th>
+      <th align="center">&nbsp;Currently <a href="https://github.com/doshidak/showdex-calc/releases/tag/v1.4.2">v1.4.2</a>&nbsp;</th>
+      <th align="center">&nbsp;Powering <a href="https://github.com/doshidak/showdex"><code>showdex</code></a> · <a href="https://github.com/doshidak/showdex/releases/tag/v1.4.2">v1.4.2</a>&nbsp;</th>
       <th align="center">&nbsp;Patches <a href="https://github.com/smogon/damage-calc/tree/master/calc"><code>@smogon/calc</code></a> · <a href="https://npmjs.com/package/@smogon/calc/v/0.11.0">v0.11.0</a> &rarr; <a href="https://github.com/doshidak/showdex-calc/commit/ee8848493747e95ab0a5f2c1c41a27b706174271"><code>ee88484</code></a>&nbsp;</th>
     </tr>
   </thead>
